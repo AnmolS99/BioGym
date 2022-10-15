@@ -6,13 +6,18 @@ class Renderer():
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
-    def __init__(self, render_mode, window_size, grid_size,
-                 protection_unit_size) -> None:
+    def __init__(self, render_mode, sim_height, pix_padding, num_species,
+                 grid_size, protection_unit_size) -> None:
 
         self.grid_size = grid_size
         self.protection_unit_size = protection_unit_size
-        self.window_size = 768  # Size of PyGame window
-        self.pix_square_size = (self.window_size / self.grid_size
+        self.pix_padding = pix_padding  # Padding between the different simulations
+        self.sim_height = sim_height  # Height of PyGame window
+        self.window_height = sim_height + self.pix_padding * 2
+        self.window_width = (
+            (sim_height + self.pix_padding) *
+            num_species) + self.pix_padding  # Length of PyGame window
+        self.pix_square_size = (self.sim_height / self.grid_size
                                 )  # Size of a single grid square in pixels
 
         self.window = None
@@ -26,13 +31,17 @@ class Renderer():
         if self.render_mode == "human":
             return self._render_frame(obs, prot_units)
 
-    def _render_fill_square(self, canvas, rgb_color, coordinates):
+    def _render_fill_square(self, canvas, rgb_color, coordinates, sim_num):
         """
         NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
         """
+        x = (self.pix_square_size *
+             (coordinates[0] + self.grid_size * sim_num) +
+             self.pix_padding * sim_num) + self.pix_padding
+        y = self.pix_square_size * coordinates[1] + self.pix_padding
         pygame.draw.rect(
             canvas, rgb_color,
-            pygame.Rect(self.pix_square_size * coordinates,
+            pygame.Rect(np.array([x, y]),
                         (self.pix_square_size, self.pix_square_size)))
 
     def _render_draw_protection_unit(self, canvas, coordinates):
@@ -41,8 +50,10 @@ class Renderer():
         NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
         """
         pix_prot_unit_size = self.pix_square_size * self.protection_unit_size
-        pix_x_start = coordinates[0] * self.pix_square_size
-        pix_y_start = coordinates[1] * self.pix_square_size
+        pix_x_start = (coordinates[0] *
+                       self.pix_square_size) + self.pix_padding
+        pix_y_start = (coordinates[1] *
+                       self.pix_square_size) + self.pix_padding
 
         # Drawing the left vertical line
         pygame.draw.line(canvas, (0, 0, 255), (pix_x_start, pix_y_start),
@@ -68,16 +79,27 @@ class Renderer():
                           pix_y_start + pix_prot_unit_size),
                          width=6)
 
-    def _render_draw_gridlines(self, canvas):
+    def _render_draw_gridlines(self, canvas, sim_num):
         for x in range(self.grid_size + 1):
+
+            x_start = self.pix_padding * (sim_num + 1) + (self.sim_height *
+                                                          sim_num)
+            y_start = self.pix_padding
+            x_offset_start = (self.pix_square_size * x) + x_start
+            y_offset_start = (self.pix_square_size * x) + y_start
+            x_end = (self.sim_height + self.pix_padding) * (sim_num + 1)
+            y_end = self.sim_height + self.pix_padding
+
+            # Draw horizontal lines
             pygame.draw.line(canvas,
-                             0, (0, self.pix_square_size * x),
-                             (self.window_size, self.pix_square_size * x),
+                             0, (x_start, y_offset_start),
+                             (x_end, y_offset_start),
                              width=3)
 
+            # Draw vertical lines
             pygame.draw.line(canvas,
-                             0, (self.pix_square_size * x, 0),
-                             (self.pix_square_size * x, self.window_size),
+                             0, (x_offset_start, y_start),
+                             (x_offset_start, y_end),
                              width=3)
 
     def _render_frame(self, obs, prot_units):
@@ -85,30 +107,33 @@ class Renderer():
             pygame.init()
             pygame.display.init()
             self.window = pygame.display.set_mode(
-                (self.window_size, self.window_size))
+                (self.window_width, self.window_height))
 
         if self.clock is None and self.render_mode == "human":
             self.clock = pygame.time.Clock()
 
-        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas = pygame.Surface((self.window_width, self.window_height))
         canvas.fill((255, 255, 255))
 
         # First we draw species 0
         green = (0, 100, 0)
-        species_0_population = obs["species_0"]
 
-        for iy, ix in np.ndindex(species_0_population.shape):
-            population_in_cell = species_0_population[iy, ix]
+        for i in range(len(obs.keys())):
+            species = "species_" + str(i)
+            population = obs[species]
 
-            color_tuple = tuple(
-                elem -
-                int((elem / species_0_population.max()) * population_in_cell)
-                for elem in green)
+            for iy, ix in np.ndindex(population.shape):
+                population_in_cell = population[iy, ix]
 
-            self._render_fill_square(canvas, color_tuple, np.array([ix, iy]))
+                color_tuple = tuple(
+                    elem - int((elem / population.max()) * population_in_cell)
+                    for elem in green)
 
-        # Finally, add some gridlines
-        self._render_draw_gridlines(canvas)
+                self._render_fill_square(canvas, color_tuple,
+                                         np.array([ix, iy]), i)
+
+            # Finally, add some gridlines
+            self._render_draw_gridlines(canvas, i)
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:
