@@ -9,11 +9,11 @@ class Renderer():
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
                  grid_size, protection_unit_size) -> None:
 
-        self.grid_size = grid_size
-        self.protection_unit_size = protection_unit_size
+        self.grid_size = grid_size  # Number of cells in a row/column in the grid
+        self.protection_unit_size = protection_unit_size  # Number of row/column in the protection units
         self.pix_padding = pix_padding  # Padding between the different simulations
-        self.sim_height = sim_height  # Height of PyGame window
-        self.window_height = sim_height + self.pix_padding * 2
+        self.sim_height = sim_height  # Height of simulation grids
+        self.window_height = sim_height + self.pix_padding * 2  # Height of PyGame window
         self.window_width = (
             (sim_height + self.pix_padding) *
             num_species) + self.pix_padding  # Length of PyGame window
@@ -102,10 +102,32 @@ class Renderer():
                              (x_offset_start, y_end),
                              width=3)
 
+    def _render_add_description(self, canvas, sim_num, max_sim):
+        """
+        Add information about specific simulation e.g. name
+        """
+        x = (self.pix_padding *
+             (sim_num + 1)) + (self.sim_height // 2) + (self.sim_height *
+                                                        sim_num)
+        y_title = self.pix_padding // 2
+        size = self.pix_padding // 2
+        font = pygame.font.Font("freesansbold.ttf", size)
+        title_text = font.render("species_" + str(sim_num), True, 0)
+        title_textRect = title_text.get_rect()
+        title_textRect.center = (x, y_title)
+        canvas.blit(title_text, title_textRect)
+
+        y_desc = int(self.pix_padding * 1.5 + self.sim_height)
+        desc_text = font.render("max: " + str(max_sim), True, 0)
+        desc_textRect = desc_text.get_rect()
+        desc_textRect.center = (x, y_desc)
+        canvas.blit(desc_text, desc_textRect)
+
     def _render_frame(self, obs, prot_units):
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
+            pygame.display.set_caption("Spatio-temporal Species Simulator")
             self.window = pygame.display.set_mode(
                 (self.window_width, self.window_height))
 
@@ -118,8 +140,8 @@ class Renderer():
         # First we draw species 0
         green = (0, 100, 0)
 
-        for i in range(len(obs.keys())):
-            species = "species_" + str(i)
+        for sim_num in range(len(obs.keys())):
+            species = "species_" + str(sim_num)
             population = obs[species]
 
             for iy, ix in np.ndindex(population.shape):
@@ -130,10 +152,13 @@ class Renderer():
                     for elem in green)
 
                 self._render_fill_square(canvas, color_tuple,
-                                         np.array([ix, iy]), i)
+                                         np.array([ix, iy]), sim_num)
 
-            # Finally, add some gridlines
-            self._render_draw_gridlines(canvas, i)
+            # Add some gridlines
+            self._render_draw_gridlines(canvas, sim_num)
+
+            # Add descriptions
+            self._render_add_description(canvas, sim_num, population.max())
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:
