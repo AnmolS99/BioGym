@@ -146,10 +146,15 @@ class Renderer():
 
             for iy, ix in np.ndindex(population.shape):
                 population_in_cell = population[iy, ix]
+                population_range = population.max() - population.min()
 
-                color_tuple = tuple(
-                    elem - int((elem / population.max()) * population_in_cell)
-                    for elem in green)
+                if population_range == 0:  # If population is exactly the same in all cells
+                    color_tuple = green
+                else:
+                    color_tuple = tuple(
+                        elem - int(((population.max() - population_in_cell) /
+                                    population_range) * elem)
+                        for elem in green)
 
                 self._render_fill_square(canvas, color_tuple,
                                          np.array([ix, iy]), sim_num)

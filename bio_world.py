@@ -2,6 +2,7 @@ import gym
 from gym import spaces
 import numpy as np
 from renderer import Renderer
+from bio_environment import BioEnvironment
 
 
 class BioGymWorld(gym.Env):
@@ -18,20 +19,12 @@ class BioGymWorld(gym.Env):
         self.protection_unit_size = protection_unit_size
         self.renderer = Renderer(render_mode, sim_height, render_pix_padding,
                                  num_species, grid_size, protection_unit_size)
-        self.num_species = num_species
-        self.species_populations = {}
+        self.bio_environment = BioEnvironment(num_species, grid_size)
 
-        species_dict = {}
+        species_dict = self.bio_environment.init_species_populations(
+            type="Box")
 
         # Creating the observation space
-        for i in range(num_species):
-
-            species_dict["species_" + str(i)] = spaces.Box(0,
-                                                           np.inf,
-                                                           shape=(grid_size,
-                                                                  grid_size),
-                                                           dtype=int)
-
         self.observation_space = spaces.Dict(species_dict)
 
         self.action_space = spaces.Discrete(
@@ -48,7 +41,7 @@ class BioGymWorld(gym.Env):
         return np.array([x_coor, y_coor])
 
     def _get_obs(self):
-        return self.species_populations
+        return self.bio_environment.species_populations
 
     def _get_info(self):
         return {"info": "Placeholder for information"}
@@ -58,13 +51,7 @@ class BioGymWorld(gym.Env):
         super().reset(seed=seed)
 
         # Choose species populations randomly
-        for i in range(self.num_species):
-            self.species_populations["species_" +
-                                     str(i)] = self.np_random.integers(
-                                         0,
-                                         100,
-                                         size=(self.grid_size, self.grid_size),
-                                         dtype=int)
+        self.bio_environment.reset()
 
         # Reset protection units
         self.protection_units = []
@@ -80,6 +67,7 @@ class BioGymWorld(gym.Env):
         # Map the action
         protection_unit_coordinates = self._action_to_coordinate(action)
         self.protection_units.append(protection_unit_coordinates)
+        self.bio_environment
 
         terminated = False
         reward = 1 if terminated else 0

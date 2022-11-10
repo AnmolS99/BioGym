@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import odeint
+from gym import spaces
 
 
 class BioEnvironment():
@@ -10,6 +11,13 @@ class BioEnvironment():
     def __init__(self, num_species, grid_size) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
+
+        self.species_ranges = [[48, 50], [11, 12], [
+            0.01, 0.01
+        ]]  # Initial population ranges of the different species
+
+        self.species_populations = self.init_species_populations(
+        )  # Initialize species populations
 
         r = 3.33  # Maximum reproduction per prey
         k = 100  # Carrying capacity of prey in a cell
@@ -28,10 +36,34 @@ class BioEnvironment():
 
         self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
 
-    def init_species_populations(self) -> dict:
+    def init_species_populations(self, type="numpy") -> dict:
         """
-        Initialize populations for the different species
+        Initialize populations for the different species (either as matrix (numpy) or Box (spaces))
         """
+        if type != "numpy" and type != "Box":
+            raise Exception(
+                "Type not supported, needs to be either 'numpy' or 'Box'")
+
+        species_dict = {}
+
+        # Creating the observation space
+        for i in range(self.num_species):
+
+            if type == "Box":
+                # Initialize the species population as a Box
+                species_dict["species_" + str(i)] = spaces.Box(
+                    self.species_ranges[i][0],
+                    self.species_ranges[i][1],
+                    shape=(self.grid_size, self.grid_size),
+                    dtype=int)
+            else:
+                # Initialize the species population as a NumPy ndarray
+                species_dict["species_" + str(i)] = np.random.uniform(
+                    self.species_ranges[i][0],
+                    self.species_ranges[i][1],
+                    size=(self.grid_size, self.grid_size))
+
+        return species_dict
 
     def sim_ode(self, variables, t, params):
 
@@ -72,12 +104,19 @@ class BioEnvironment():
         y = odeint(self.sim_ode, y0, t, args=(self.params, ))
         return y[1]
 
+    def reset(self):
+        """
+        Reseting environment
+        """
+        self.species_populations = self.init_species_populations()
+
 
 def main():
     """
     Main function for running this python script.
     """
     b = BioEnvironment(3, 5)
+    print(b.init_species_populations())
     print(b.sim_step([50, 12, 0.01]))
 
 
