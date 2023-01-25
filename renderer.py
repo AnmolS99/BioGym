@@ -118,7 +118,7 @@ class Renderer():
         canvas.blit(title_text, title_textRect)
 
         y_desc = int(self.pix_padding * 1.5 + self.sim_height)
-        desc_text = font.render("max: " + str(max_sim), True, 0)
+        desc_text = font.render("max: " + str(round(max_sim, 2)), True, 0)
         desc_textRect = desc_text.get_rect()
         desc_textRect.center = (x, y_desc)
         canvas.blit(desc_text, desc_textRect)

@@ -13,7 +13,7 @@ class BioEnvironment():
         self.grid_size = grid_size
 
         self.species_ranges = [[48, 50], [11, 12], [
-            0.01, 0.01
+            0.01, 0.011
         ]]  # Initial population ranges of the different species
 
         self.species_populations = self.init_species_populations(
