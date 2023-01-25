@@ -1,11 +1,11 @@
-import gym
-from gym import spaces
+import gymnasium
+from gymnasium import spaces
 import numpy as np
 from renderer import Renderer
 from bio_environment import BioEnvironment
 
 
-class BioGymWorld(gym.Env):
+class BioGymWorld(gymnasium.Env):
 
     def __init__(self,
                  render_mode=None,
@@ -67,7 +67,7 @@ class BioGymWorld(gym.Env):
         # Map the action
         protection_unit_coordinates = self._action_to_coordinate(action)
         self.protection_units.append(protection_unit_coordinates)
-        self.bio_environment
+        self.bio_environment.step()
 
         terminated = False
         reward = 1 if terminated else 0

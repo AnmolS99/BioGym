@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.integrate import odeint
-from gym import spaces
+from gymnasium import spaces
 
 
 class BioEnvironment():
@@ -71,6 +71,11 @@ class BioEnvironment():
 
         return species_populations
 
+    def get_species_start_max(self, species_num):
+        """
+        Returns the
+        """
+
     def sim_ode(self, variables, t, params):
 
         if (self.num_species != 3):
@@ -103,12 +108,26 @@ class BioEnvironment():
 
         return [dn_1dt, dn_2dt, dn_3dt]
 
-    def sim_step(self, y0) -> np.array:
+    def sim_cell_step(self, y0) -> np.array:
+        """
+        Simulating a step in a single cell of the grid
+        """
+
         t = np.linspace(
             0, 2,
             num=2)  # Two timesteps: t0 (current state) and t1 (next state)
         y = odeint(self.sim_ode, y0, t, args=(self.params, ))
         return y[1]
+
+    def step(self):
+        """
+        Simulating a step for the whole grid
+        """
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                old_cell_state = self.species_populations[:, x, y]
+                new_cell_state = self.sim_cell_step(old_cell_state)
+                self.species_populations[:, x, y] = new_cell_state
 
     def reset(self):
         """
@@ -123,7 +142,9 @@ def main():
     """
     b = BioEnvironment(3, 5)
     print(b.init_species_populations())
-    print(b.sim_step([50, 12, 0.01]))
+    a = b.species_populations[:, 0, 0]
+    print("a: " + str(a))
+    print(b.sim_cell_step(a))
 
 
 if __name__ == '__main__':
