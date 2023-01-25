@@ -16,6 +16,9 @@ class BioEnvironment():
             0.01, 0.011
         ]]  # Initial population ranges of the different species
 
+        self.species_max = [range[1] for range in self.species_ranges
+                            ]  # The highest recorded population of a species
+
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
 
@@ -52,10 +55,10 @@ class BioEnvironment():
             # Initialize the species population as a Box
             for i in range(self.num_species):
                 species_populations["species_" + str(i)] = spaces.Box(
-                    self.species_ranges[i][0],
-                    self.species_ranges[i][1],
+                    0,
+                    np.inf,
                     shape=(self.grid_size, self.grid_size),
-                    dtype=int)
+                    dtype=float)
         else:
             # Initialize numpy ndarray
             species_populations = np.zeros(
@@ -71,10 +74,11 @@ class BioEnvironment():
 
         return species_populations
 
-    def get_species_start_max(self, species_num):
+    def get_species_max(self, species_num):
         """
-        Returns the
+        Returns the defined max of a species
         """
+        return self.species_max[species_num]
 
     def sim_ode(self, variables, t, params):
 
