@@ -140,20 +140,25 @@ class Renderer():
         # First we draw species 0
         green = (0, 100, 0)
 
-        for species_num in range(len(obs)):
-            population = obs[species_num]
+        # Unpack observations
+        species_pop, species_max = obs
+
+        for species_num in range(len(species_pop)):
+            population = species_pop[species_num]
+            population_max = species_max[species_num]
+
+            population_range = population_max - population.min()
 
             for iy, ix in np.ndindex(population.shape):
                 population_in_cell = population[iy, ix]
-                population_range = population.max() - population.min()
 
                 if population_range == 0:  # If population is exactly the same in all cells
                     color_tuple = green
                 else:
                     color_tuple = tuple(
-                        elem - int(((population.max() - population_in_cell) /
-                                    population_range) * elem)
-                        for elem in green)
+                        elem + 20 -
+                        int(((population_max - population_in_cell) /
+                             population_range) * elem) for elem in green)
 
                 self._render_fill_square(canvas, color_tuple,
                                          np.array([ix, iy]), species_num)
@@ -162,7 +167,7 @@ class Renderer():
             self._render_draw_gridlines(canvas, species_num)
 
             # Add descriptions
-            self._render_add_description(canvas, species_num, population.max())
+            self._render_add_description(canvas, species_num, population_max)
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:

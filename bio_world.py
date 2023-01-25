@@ -41,7 +41,7 @@ class BioGymWorld(gym.Env):
         return np.array([x_coor, y_coor])
 
     def _get_obs(self):
-        return self.bio_environment.species_populations
+        return self.bio_environment.get_obs()
 
     def _get_info(self):
         return {"info": "Placeholder for information"}

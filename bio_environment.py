@@ -77,7 +77,7 @@ class BioEnvironment():
 
     def get_species_max(self, species_num):
         """
-        Returns the defined max of a species
+        Returns the defined max of a species (CURRENTLY UNUSED)
         """
         return self.species_pop_max[species_num]
 
@@ -139,6 +139,12 @@ class BioEnvironment():
             curr_pop_max = self.species_populations[i].max()
             if curr_pop_max > self.species_pop_max[i]:
                 self.species_pop_max[i] = curr_pop_max
+
+    def get_obs(self):
+        """
+        Returns detailed information about the current status of the BioEnvironment
+        """
+        return self.species_populations, self.species_pop_max
 
     def reset(self):
         """
