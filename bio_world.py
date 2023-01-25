@@ -1,11 +1,11 @@
-import gymnasium
+import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 from renderer import Renderer
 from bio_environment import BioEnvironment
 
 
-class BioGymWorld(gymnasium.Env):
+class BioGymWorld(gym.Env):
 
     def __init__(self,
                  render_mode=None,
