@@ -44,26 +44,32 @@ class BioEnvironment():
             raise Exception(
                 "Type not supported, needs to be either 'numpy' or 'Box'")
 
-        species_dict = {}
-
         # Creating the observation space
-        for i in range(self.num_species):
+        if type == "Box":
 
-            if type == "Box":
-                # Initialize the species population as a Box
-                species_dict["species_" + str(i)] = spaces.Box(
+            species_populations = {}
+
+            # Initialize the species population as a Box
+            for i in range(self.num_species):
+                species_populations["species_" + str(i)] = spaces.Box(
                     self.species_ranges[i][0],
                     self.species_ranges[i][1],
                     shape=(self.grid_size, self.grid_size),
                     dtype=int)
-            else:
+        else:
+            # Initialize numpy ndarray
+            species_populations = np.zeros(
+                (self.num_species, self.grid_size, self.grid_size))
+
+            for i in range(self.num_species):
+
                 # Initialize the species population as a NumPy ndarray
-                species_dict["species_" + str(i)] = np.random.uniform(
+                species_populations[i] = np.random.uniform(
                     self.species_ranges[i][0],
                     self.species_ranges[i][1],
                     size=(self.grid_size, self.grid_size))
 
-        return species_dict
+        return species_populations
 
     def sim_ode(self, variables, t, params):
 

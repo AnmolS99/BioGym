@@ -140,9 +140,8 @@ class Renderer():
         # First we draw species 0
         green = (0, 100, 0)
 
-        for sim_num in range(len(obs.keys())):
-            species = "species_" + str(sim_num)
-            population = obs[species]
+        for species_num in range(len(obs)):
+            population = obs[species_num]
 
             for iy, ix in np.ndindex(population.shape):
                 population_in_cell = population[iy, ix]
@@ -157,13 +156,13 @@ class Renderer():
                         for elem in green)
 
                 self._render_fill_square(canvas, color_tuple,
-                                         np.array([ix, iy]), sim_num)
+                                         np.array([ix, iy]), species_num)
 
             # Add some gridlines
-            self._render_draw_gridlines(canvas, sim_num)
+            self._render_draw_gridlines(canvas, species_num)
 
             # Add descriptions
-            self._render_add_description(canvas, sim_num, population.max())
+            self._render_add_description(canvas, species_num, population.max())
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:

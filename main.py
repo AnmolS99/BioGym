@@ -14,9 +14,10 @@ for i in range(1, episodes + 1):
 
     timestep = 0
 
-    while not done and timestep < 100:
+    while not done and timestep < 5:
         timestep += 1
-        action = env.action_space.sample()
+        #action = env.action_space.sample()
+        action = 0
         n_state, reward, done, info = env.step(action)
         score += reward
 env.close()
