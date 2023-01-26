@@ -7,7 +7,7 @@ class Renderer():
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
-                 grid_size, protection_unit_size) -> None:
+                 grid_size, protection_unit_size, display_population) -> None:
 
         self.grid_size = grid_size  # Number of cells in a row/column in the grid
         self.protection_unit_size = protection_unit_size  # Number of row/column in the protection units
@@ -19,6 +19,8 @@ class Renderer():
             num_species) + self.pix_padding  # Length of PyGame window
         self.pix_square_size = (self.sim_height / self.grid_size
                                 )  # Size of a single grid square in pixels
+
+        self.display_population = display_population
 
         self.window = None
         self.clock = None
@@ -35,6 +37,7 @@ class Renderer():
         """
         NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
         """
+        # Coordinates for the top left corner of the appropriate cell
         x = (self.pix_square_size *
              (coordinates[0] + self.grid_size * sim_num) +
              self.pix_padding * sim_num) + self.pix_padding
@@ -123,6 +126,26 @@ class Renderer():
         desc_textRect.center = (x, y_desc)
         canvas.blit(desc_text, desc_textRect)
 
+    def _render_add_population_number(self, canvas, coordinates, sim_num,
+                                      population):
+        """
+        NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
+        """
+        # Coordinates for the top left corner of the appropriate cell
+        x = (self.pix_square_size *
+             (coordinates[0] + self.grid_size * sim_num) +
+             self.pix_padding * sim_num) + self.pix_padding
+        y = self.pix_square_size * coordinates[1] + self.pix_padding
+
+        size = int(self.pix_square_size // 4)
+
+        font = pygame.font.Font("freesansbold.ttf", size)
+        pop_text = font.render("" + str(round(population, 3)), True, 0)
+        pop_textRect = pop_text.get_rect()
+        pop_textRect.center = (x + self.pix_square_size // 2,
+                               y + self.pix_square_size // 2)
+        canvas.blit(pop_text, pop_textRect)
+
     def _render_frame(self, obs, prot_units):
         if self.window is None and self.render_mode == "human":
             pygame.init()
@@ -151,6 +174,7 @@ class Renderer():
 
             for iy, ix in np.ndindex(population.shape):
                 population_in_cell = population[iy, ix]
+                cell_coordinates = np.array([ix, iy])
 
                 if population_range == 0:  # If population is exactly the same in all cells
                     color_tuple = green
@@ -160,8 +184,14 @@ class Renderer():
                         int(((population_max - population_in_cell) /
                              population_range) * elem) for elem in green)
 
-                self._render_fill_square(canvas, color_tuple,
-                                         np.array([ix, iy]), species_num)
+                self._render_fill_square(canvas, color_tuple, cell_coordinates,
+                                         species_num)
+
+                if self.display_population:
+                    self._render_add_population_number(canvas,
+                                                       cell_coordinates,
+                                                       species_num,
+                                                       population_in_cell)
 
             # Add some gridlines
             self._render_draw_gridlines(canvas, species_num)

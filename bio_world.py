@@ -13,12 +13,14 @@ class BioGymWorld(gym.Env):
                  render_pix_padding=50,
                  grid_size=5,
                  protection_unit_size=3,
-                 num_species=3) -> None:
+                 num_species=3,
+                 display_population=True) -> None:
         super().__init__()
         self.grid_size = grid_size
         self.protection_unit_size = protection_unit_size
         self.renderer = Renderer(render_mode, sim_height, render_pix_padding,
-                                 num_species, grid_size, protection_unit_size)
+                                 num_species, grid_size, protection_unit_size,
+                                 display_population)
         self.bio_environment = BioEnvironment(num_species, grid_size)
 
         species_dict = self.bio_environment.init_species_populations(
