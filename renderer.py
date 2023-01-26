@@ -22,6 +22,8 @@ class Renderer():
 
         self.display_population = display_population
 
+        self.font_name = "Arial"
+
         self.window = None
         self.clock = None
 
@@ -114,7 +116,7 @@ class Renderer():
                                                         sim_num)
         y_title = self.pix_padding // 2
         size = self.pix_padding // 2
-        font = pygame.font.Font("freesansbold.ttf", size)
+        font = pygame.font.SysFont(self.font_name, size)
         title_text = font.render("species_" + str(sim_num), True, 0)
         title_textRect = title_text.get_rect()
         title_textRect.center = (x, y_title)
@@ -139,7 +141,7 @@ class Renderer():
 
         size = int(self.pix_square_size // 4)
 
-        font = pygame.font.Font("freesansbold.ttf", size)
+        font = pygame.font.SysFont(self.font_name, size)
         pop_text = font.render("" + str(round(population, 3)), True, 0)
         pop_textRect = pop_text.get_rect()
         pop_textRect.center = (x + self.pix_square_size // 2,

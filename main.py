@@ -15,7 +15,7 @@ for i in range(1, episodes + 1):
 
     timestep = 0
 
-    while not done and timestep < 50:
+    while not done and timestep < 10:
         timestep += 1
         #action = env.action_space.sample()
         action = 0
