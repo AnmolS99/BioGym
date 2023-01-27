@@ -170,7 +170,7 @@ class Renderer():
 
         for species_num in range(len(species_pop)):
             population = species_pop[species_num]
-            population_max = species_max[species_num]
+            population_max = population.max()
 
             population_range = population_max - population.min()
 

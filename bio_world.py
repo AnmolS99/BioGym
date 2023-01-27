@@ -3,6 +3,7 @@ from gymnasium import spaces
 import numpy as np
 from renderer import Renderer
 from bio_environment import BioEnvironment
+from sns_renderer import SNS_Renderer
 
 
 class BioGymWorld(gym.Env):
@@ -18,9 +19,10 @@ class BioGymWorld(gym.Env):
         super().__init__()
         self.grid_size = grid_size
         self.protection_unit_size = protection_unit_size
-        self.renderer = Renderer(render_mode, sim_height, render_pix_padding,
-                                 num_species, grid_size, protection_unit_size,
-                                 display_population)
+        self.renderer = SNS_Renderer(render_mode, sim_height,
+                                     render_pix_padding, num_species,
+                                     grid_size, protection_unit_size,
+                                     display_population)
         self.bio_environment = BioEnvironment(num_species, grid_size)
 
         species_dict = self.bio_environment.init_species_populations(
