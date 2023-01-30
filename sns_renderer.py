@@ -29,25 +29,31 @@ class SNS_Renderer():
 
         fig, axs = plt.subplots(
             ncols=(num_species * 3) - 1,
-            gridspec_kw=dict(width_ratios=[10, 1, 0.5, 10, 1, 0.5, 10, 1]),
+            gridspec_kw=dict(width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
             figsize=(20, 5))
 
         # Remove axes only used to add spacing between colourbar and next heatmap
         axs[2].remove()
         axs[5].remove()
 
-        # fig.tight_layout()
+        plt.show()
 
         self.fig = fig
         self.axs = axs
-
-        plt.show()
 
         self.heatmaps = [None] * num_species
 
         assert render_mode is None or render_mode in self.metadata[
             "render_modes"]
         self.render_mode = render_mode
+
+    def _render_add_description(self):
+        for i in range(self.num_species):
+            self.axs[i * 3].set_title("species_" + str(i),
+                                      fontdict={
+                                          'fontsize': 15,
+                                          'fontweight': 'medium'
+                                      })
 
     def render(self, obs, prot_units):
         if self.render_mode == "human":
@@ -67,8 +73,18 @@ class SNS_Renderer():
             self.heatmaps[i] = sns.heatmap(species_pop[i],
                                            annot=self.display_population,
                                            ax=self.axs[i * 3],
+                                           linewidths=0.5,
+                                           xticklabels=False,
+                                           yticklabels=False,
                                            cbar_ax=self.axs[(i * 3) + 1],
                                            cmap="Greens")
+
+            self.heatmaps[i].axhline(y=0, color='k', linewidth=5)
+            self.heatmaps[i].axhline(y=self.grid_size, color='k', linewidth=5)
+            self.heatmaps[i].axvline(x=0, color='k', linewidth=5)
+            self.heatmaps[i].axvline(x=self.grid_size, color='k', linewidth=5)
+
+        self._render_add_description()
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:
