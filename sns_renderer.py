@@ -58,8 +58,14 @@ class SNS_Renderer():
         # Unpack observations
         species_pop, species_max = obs
 
+        # Create heatmaps
         for i in range(self.num_species):
+            # Clearing previous heatmaps
+            self.axs[i * 3].cla()
+
+            # Create heatmap with data from obs
             self.heatmaps[i] = sns.heatmap(species_pop[i],
+                                           annot=self.display_population,
                                            ax=self.axs[i * 3],
                                            cbar_ax=self.axs[(i * 3) + 1],
                                            cmap="Greens")
@@ -75,8 +81,8 @@ class SNS_Renderer():
                           lw=3))
 
         self.fig.canvas.draw()
-        time.sleep(2)
         self.fig.canvas.flush_events()
+        time.sleep(2)
 
     def close(self):
         plt.close()
