@@ -10,6 +10,7 @@ class BioGymWorld(gym.Env):
 
     def __init__(self,
                  render_mode=None,
+                 sns_renderer=False,
                  sim_height=500,
                  render_pix_padding=50,
                  grid_size=5,
@@ -19,10 +20,17 @@ class BioGymWorld(gym.Env):
         super().__init__()
         self.grid_size = grid_size
         self.protection_unit_size = protection_unit_size
-        self.renderer = SNS_Renderer(render_mode, sim_height,
+        if sns_renderer:
+            self.renderer = SNS_Renderer(render_mode, sim_height,
+                                         render_pix_padding, num_species,
+                                         grid_size, protection_unit_size,
+                                         display_population)
+        else:
+            self.renderer = Renderer(render_mode, sim_height,
                                      render_pix_padding, num_species,
                                      grid_size, protection_unit_size,
                                      display_population)
+
         self.bio_environment = BioEnvironment(num_species, grid_size)
 
         species_dict = self.bio_environment.init_species_populations(

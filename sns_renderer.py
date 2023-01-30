@@ -28,16 +28,22 @@ class SNS_Renderer():
         plt.ion()
 
         fig, axs = plt.subplots(
-            ncols=num_species * 2,
-            gridspec_kw=dict(width_ratios=[10, 1, 10, 1, 10, 1]),
+            ncols=(num_species * 3) - 1,
+            gridspec_kw=dict(width_ratios=[10, 1, 0.5, 10, 1, 0.5, 10, 1]),
             figsize=(20, 5))
 
-        fig.tight_layout()
+        # Remove axes only used to add spacing between colourbar and next heatmap
+        axs[2].remove()
+        axs[5].remove()
+
+        # fig.tight_layout()
 
         self.fig = fig
         self.axs = axs
 
         plt.show()
+
+        self.heatmaps = [None] * num_species
 
         assert render_mode is None or render_mode in self.metadata[
             "render_modes"]
@@ -52,21 +58,15 @@ class SNS_Renderer():
         # Unpack observations
         species_pop, species_max = obs
 
-        p0 = sns.heatmap(species_pop[0],
-                         ax=self.axs[0],
-                         cbar_ax=self.axs[1],
-                         cmap="Greens")
-        p1 = sns.heatmap(species_pop[1],
-                         ax=self.axs[2],
-                         cbar_ax=self.axs[3],
-                         cmap="Greens")
-        p2 = sns.heatmap(species_pop[2],
-                         ax=self.axs[4],
-                         cbar_ax=self.axs[5],
-                         cmap="Greens")
+        for i in range(self.num_species):
+            self.heatmaps[i] = sns.heatmap(species_pop[i],
+                                           ax=self.axs[i * 3],
+                                           cbar_ax=self.axs[(i * 3) + 1],
+                                           cmap="Greens")
+
         # Draw protection unit
         for prot_unit_coordinates in prot_units:
-            p0.add_patch(
+            self.heatmaps[0].add_patch(
                 Rectangle(prot_unit_coordinates,
                           self.protection_unit_size,
                           self.protection_unit_size,

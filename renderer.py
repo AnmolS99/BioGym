@@ -54,6 +54,7 @@ class Renderer():
         Drawing the protection unit, given the coordinates of the top-left corner
         NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
         """
+        # TODO: MUST ADD SUPPORT FOR PROT UNITS FOR DIFFERENT SPECIES
         pix_prot_unit_size = self.pix_square_size * self.protection_unit_size
         pix_x_start = (coordinates[0] *
                        self.pix_square_size) + self.pix_padding

@@ -1,6 +1,7 @@
 from bio_world import BioGymWorld
 
 env = BioGymWorld(render_mode="human",
+                  sns_renderer=False,
                   grid_size=5,
                   sim_height=300,
                   num_species=3,
