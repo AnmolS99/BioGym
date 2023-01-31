@@ -1,7 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from renderer import Renderer
+from pygame_renderer import Pygame_Renderer
 from bio_environment import BioEnvironment
 from sns_renderer import SNS_Renderer
 
@@ -26,10 +26,10 @@ class BioGymWorld(gym.Env):
                                          grid_size, protection_unit_size,
                                          display_population)
         else:
-            self.renderer = Renderer(render_mode, sim_height,
-                                     render_pix_padding, num_species,
-                                     grid_size, protection_unit_size,
-                                     display_population)
+            self.renderer = Pygame_Renderer(render_mode, sim_height,
+                                            render_pix_padding, num_species,
+                                            grid_size, protection_unit_size,
+                                            display_population)
 
         self.bio_environment = BioEnvironment(num_species, grid_size)
 

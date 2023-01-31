@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 
 
-class Renderer():
+class Pygame_Renderer():
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
