@@ -16,10 +16,6 @@ class BioEnvironment():
             0.01, 0.011
         ]]  # Initial population ranges of the different species
 
-        self.species_pop_max = [
-            range[1] for range in self.species_ranges
-        ]  # The highest recorded population of a species
-
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
 
@@ -75,12 +71,6 @@ class BioEnvironment():
 
         return species_populations
 
-    def get_species_max(self, species_num):
-        """
-        Returns the defined max of a species (CURRENTLY UNUSED)
-        """
-        return self.species_pop_max[species_num]
-
     def sim_ode(self, variables, t, params):
 
         if (self.num_species != 3):
@@ -134,17 +124,11 @@ class BioEnvironment():
                 new_cell_state = self.sim_cell_step(old_cell_state)
                 self.species_populations[:, x, y] = new_cell_state
 
-        # Potentially update the max recorded species population
-        for i in range(self.num_species):
-            curr_pop_max = self.species_populations[i].max()
-            if curr_pop_max > self.species_pop_max[i]:
-                self.species_pop_max[i] = curr_pop_max
-
     def get_obs(self):
         """
         Returns detailed information about the current status of the BioEnvironment
         """
-        return self.species_populations, self.species_pop_max
+        return self.species_populations
 
     def reset(self):
         """
