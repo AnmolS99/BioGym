@@ -59,7 +59,7 @@ class SNS_Renderer():
     def _render_frame(self, obs, prot_units):
 
         # Unpack observations
-        species_pop, species_max = obs
+        species_pop = obs
 
         # Create heatmaps
         for i in range(self.num_species):
@@ -95,7 +95,6 @@ class SNS_Renderer():
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
-        time.sleep(2)
 
     def close(self):
         plt.close()

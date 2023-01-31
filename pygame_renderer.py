@@ -167,7 +167,7 @@ class Pygame_Renderer():
         green = (0, 100, 0)
 
         # Unpack observations
-        species_pop, species_max = obs
+        species_pop = obs
 
         for species_num in range(len(species_pop)):
             population = species_pop[species_num]
