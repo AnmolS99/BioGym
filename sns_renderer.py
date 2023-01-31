@@ -15,12 +15,9 @@ class SNS_Renderer():
         self.protection_unit_size = protection_unit_size  # Number of row/column in the protection units
         self.pix_padding = pix_padding  # Padding between the different simulations
         self.sim_height = sim_height  # Height of simulation grids
-        self.window_height = sim_height + self.pix_padding * 2  # Height of PyGame window
-        self.window_width = (
-            (sim_height + self.pix_padding) *
-            num_species) + self.pix_padding  # Length of PyGame window
-        self.pix_square_size = (self.sim_height / self.grid_size
-                                )  # Size of a single grid square in pixels
+        self.window_height = sim_height // 50  # Height of plt window
+        self.window_width = self.window_height * (num_species + 1
+                                                  )  # Length of plt window
         self.num_species = num_species
 
         self.display_population = display_population
@@ -30,7 +27,7 @@ class SNS_Renderer():
         fig, axs = plt.subplots(
             ncols=(num_species * 3) - 1,
             gridspec_kw=dict(width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
-            figsize=(20, 5))
+            figsize=(self.window_width, self.window_height))
 
         # Remove axes only used to add spacing between colourbar and next heatmap
         axs[2].remove()
