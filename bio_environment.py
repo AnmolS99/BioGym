@@ -8,9 +8,16 @@ class BioEnvironment():
     Biological environment, containing all logic relating to the environment
     """
 
-    def __init__(self, num_species, grid_size) -> None:
+    def __init__(self,
+                 num_species,
+                 grid_size,
+                 diagonal_neighbours=False) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
+
+        self.diagonal_neighbours = diagonal_neighbours
+        self.migration_rate = np.array([0.10, 0.05,
+                                        0.01])  # Migration rate between cells
 
         self.species_ranges = [[48, 50], [11, 12], [
             0.01, 0.011
@@ -114,15 +121,108 @@ class BioEnvironment():
         y = odeint(self.sim_ode, y0, t, args=(self.params, ))
         return y[1]
 
+    def get_num_cell_neighbours(self, coordinates):
+        """
+        Returns the number of neighbouring cells.
+        Takes in cell coordinates as a tuple (x, y)
+        """
+        x = coordinates[0]
+        y = coordinates[1]
+        # If the cell is on the top/bottom edge
+        if (x == 0 or x == (self.grid_size - 1)):
+
+            # If the cell is also on left/right edge
+            if (y == 0 or y == (self.grid_size - 1)):
+                return 3 if self.diagonal_neighbours else 2
+
+            return 5 if self.diagonal_neighbours else 3
+
+        # If the cell is only on left/right edge
+        elif (y == 0 or y == (self.grid_size - 1)):
+            return 5 if self.diagonal_neighbours else 3
+
+        # If cell isnt on any edge
+        else:
+            return 8 if self.diagonal_neighbours else 4
+
+    def get_cell_neighbours(self, coordinates):
+        """
+        Returns the neighbouring cells as in a list.
+        Takes in cell coordinates as a tuple (x, y)
+        """
+        x = coordinates[0]
+        y = coordinates[1]
+
+        neighbours = []
+        # If there is a neighbour over
+        if x > 0:
+            neighbours.append((x - 1, y))
+            # If diagonal neighbours count
+            if self.diagonal_neighbours:
+                # If there is also a neighbour to the left, meaning there is a neighbour top-left
+                if y > 0:
+                    neighbours.append((x - 1, y - 1))
+                # If there is also a neighbour to the right, meaning there is a neighbour top-right
+                if y < self.grid_size - 1:
+                    neighbours.append((x - 1, y + 1))
+
+        # If there is a neighbour below
+        if x < self.grid_size - 1:
+            neighbours.append((x + 1, y))
+            # If diagonal neighbours count
+            if self.diagonal_neighbours:
+                # If there is also a neighbour to the left, meaning there is a neighbour bottom-left
+                if y > 0:
+                    neighbours.append((x + 1, y - 1))
+                # If there is also a neighbour to the right, meaning there is a neighbour bottom-right
+                if y < self.grid_size - 1:
+                    neighbours.append((x + 1, y + 1))
+
+        # If there is a neighbour to the left
+        if y > 0:
+            neighbours.append((x, y - 1))
+        # If there is a neighbour to the right
+        if y < self.grid_size - 1:
+            neighbours.append((x, y + 1))
+        return neighbours
+
+    def sim_dispersal(self):
+        "Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid"
+
+        # Create copy of species_populations
+        new_species_population = np.copy(self.species_populations)
+
+        # Dispersal out from cell
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                new_species_population[:, x,
+                                       y] *= 1 - (self.migration_rate *
+                                                  self.get_num_cell_neighbours(
+                                                      (x, y)))
+
+        # Dispersal into cell from neighbours
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                for neighbour in self.get_cell_neighbours((x, y)):
+                    new_species_population[:, x,
+                                           y] += self.species_populations[:, neighbour[
+                                               0], neighbour[
+                                                   1]] * self.migration_rate
+        self.species_populations = new_species_population
+
     def step(self):
         """
         Simulating a step for the whole grid
         """
+        # Simulating a step in the tri-trophic system for each cell in the grid
         for x in range(self.grid_size):
             for y in range(self.grid_size):
                 old_cell_state = self.species_populations[:, x, y]
                 new_cell_state = self.sim_cell_step(old_cell_state)
                 self.species_populations[:, x, y] = new_cell_state
+
+        # Simulating dispersal for the whole grid
+        self.sim_dispersal()
 
     def get_obs(self):
         """
@@ -141,11 +241,15 @@ def main():
     """
     Main function for running this python script.
     """
-    b = BioEnvironment(3, 5)
-    print(b.init_species_populations())
-    a = b.species_populations[:, 0, 0]
-    print("a: " + str(a))
-    print(b.sim_cell_step(a))
+    b = BioEnvironment(num_species=3, grid_size=3, diagonal_neighbours=False)
+    b.species_populations = np.array(
+        [[[300, 500, 100], [100, 200, 400], [700, 600, 100]],
+         [[300, 500, 100], [100, 200, 400], [700, 600, 100]],
+         [[300, 500, 100], [100, 200, 400], [700, 600, 100]]],
+        dtype=np.float64)
+    print(b.species_populations)
+    b.sim_dispersal()
+    print(b.species_populations)
 
 
 if __name__ == '__main__':
