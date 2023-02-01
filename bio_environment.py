@@ -19,9 +19,15 @@ class BioEnvironment():
         self.migration_rate = np.array([0.10, 0.05,
                                         0.01])  # Migration rate between cells
 
-        self.species_ranges = [[48, 50], [11, 12], [
-            0.01, 0.011
+        # self.species_ranges = [[48, 50], [11, 12], [
+        #     0.01, 0.011
+        # ]]  # Initial population ranges of the different species
+        self.species_ranges = [[20, 70], [9, 20], [
+            0.01, 1
         ]]  # Initial population ranges of the different species
+
+        # self.extinction_threshold = [7, 0.2, 0.008]
+        self.extinction_threshold = [5, 0.01, 0.00008]
 
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
@@ -121,6 +127,13 @@ class BioEnvironment():
         y = odeint(self.sim_ode, y0, t, args=(self.params, ))
         return y[1]
 
+    def sim_grid_step(self):
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                old_cell_state = self.species_populations[:, x, y]
+                new_cell_state = self.sim_cell_step(old_cell_state)
+                self.species_populations[:, x, y] = new_cell_state
+
     def get_num_cell_neighbours(self, coordinates):
         """
         Returns the number of neighbouring cells.
@@ -210,19 +223,26 @@ class BioEnvironment():
                                                    1]] * self.migration_rate
         self.species_populations = new_species_population
 
+    def sim_extiction(self):
+        """
+        Simulates extinction for each species, for cells with less population than the extinction threshold
+        """
+        for i in range(self.num_species):
+            self.species_populations[i][
+                self.species_populations[i] < self.extinction_threshold[i]] = 0
+
     def step(self):
         """
         Simulating a step for the whole grid
         """
         # Simulating a step in the tri-trophic system for each cell in the grid
-        for x in range(self.grid_size):
-            for y in range(self.grid_size):
-                old_cell_state = self.species_populations[:, x, y]
-                new_cell_state = self.sim_cell_step(old_cell_state)
-                self.species_populations[:, x, y] = new_cell_state
+        self.sim_grid_step()
 
         # Simulating dispersal for the whole grid
         self.sim_dispersal()
+
+        # Simulating extinction
+        self.sim_extiction()
 
     def get_obs(self):
         """
@@ -243,12 +263,12 @@ def main():
     """
     b = BioEnvironment(num_species=3, grid_size=3, diagonal_neighbours=False)
     b.species_populations = np.array(
-        [[[300, 500, 100], [100, 200, 400], [700, 600, 100]],
-         [[300, 500, 100], [100, 200, 400], [700, 600, 100]],
-         [[300, 500, 100], [100, 200, 400], [700, 600, 100]]],
+        [[[7, 6, 5], [100, 200, 400], [700, 600, 100]],
+         [[30, 0.2, 10], [10, 20, 40], [70, 60, 10]],
+         [[3, 5, 1], [1, 2, 4], [7, 0.007, 1]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.sim_dispersal()
+    b.sim_extiction()
     print(b.species_populations)
 
 
