@@ -1,9 +1,10 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import time
 
 
-class SNS_Renderer():
+class SNS_Renderer2():
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
@@ -23,14 +24,10 @@ class SNS_Renderer():
 
         plt.ion()
 
-        fig, axs = plt.subplots(
-            ncols=(num_species * 3) - 1,
-            gridspec_kw=dict(width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
-            figsize=(self.window_width, self.window_height))
-
-        # Remove axes only used to add spacing between colourbar and next heatmap
-        axs[2].remove()
-        axs[5].remove()
+        fig, axs = plt.subplots(ncols=num_species + 1,
+                                gridspec_kw=dict(width_ratios=[10, 10, 10, 1]),
+                                figsize=(self.window_width,
+                                         self.window_height))
 
         plt.show()
 
@@ -45,11 +42,11 @@ class SNS_Renderer():
 
     def _render_add_description(self):
         for i in range(self.num_species):
-            self.axs[i * 3].set_title("species_" + str(i),
-                                      fontdict={
-                                          'fontsize': 15,
-                                          'fontweight': 'medium'
-                                      })
+            self.axs[i].set_title("species_" + str(i),
+                                  fontdict={
+                                      'fontsize': 15,
+                                      'fontweight': 'medium'
+                                  })
 
     def render(self, obs, prot_units):
         if self.render_mode == "human":
@@ -60,25 +57,36 @@ class SNS_Renderer():
         # Unpack observations
         species_pop = obs
 
+        vmin = species_pop.min()
+        vmax = species_pop.max()
+
         # Create heatmaps
         for i in range(self.num_species):
             # Clearing previous heatmaps
-            self.axs[i * 3].cla()
+            self.axs[i].cla()
 
             # Create heatmap with data from obs
             self.heatmaps[i] = sns.heatmap(species_pop[i],
+                                           vmin=vmin,
+                                           vmax=vmax,
                                            annot=self.display_population,
-                                           ax=self.axs[i * 3],
+                                           ax=self.axs[i],
                                            linewidths=0.5,
                                            xticklabels=False,
                                            yticklabels=False,
-                                           cbar_ax=self.axs[(i * 3) + 1],
+                                           cbar=False,
                                            cmap="Greens")
 
             self.heatmaps[i].axhline(y=0, color='k', linewidth=5)
             self.heatmaps[i].axhline(y=self.grid_size, color='k', linewidth=5)
             self.heatmaps[i].axvline(x=0, color='k', linewidth=5)
             self.heatmaps[i].axvline(x=self.grid_size, color='k', linewidth=5)
+
+        mappable = self.heatmaps[0].get_children()[0]
+        plt.colorbar(mappable,
+                     ax=[self.axs[0], self.axs[1], self.axs[2]],
+                     cax=self.axs[3],
+                     orientation='vertical')
 
         self._render_add_description()
 

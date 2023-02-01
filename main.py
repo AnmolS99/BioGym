@@ -2,10 +2,10 @@ from bio_world import BioGymWorld
 
 env = BioGymWorld(render_mode="human",
                   sns_renderer=True,
-                  grid_size=5,
+                  grid_size=20,
                   sim_height=300,
                   num_species=3,
-                  display_population=True)
+                  display_population=False)
 
 episodes = 1
 
