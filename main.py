@@ -1,11 +1,7 @@
-from bio_world import BioGymWorld
+from config_parser import ConfigParser
 
-env = BioGymWorld(render_mode="human",
-                  sns_renderer=True,
-                  grid_size=20,
-                  sim_height=300,
-                  num_species=3,
-                  display_population=False)
+config_parser = ConfigParser("bio_env_configs/default2.ini")
+env = config_parser.create_bio_gym_world()
 
 episodes = 1
 
