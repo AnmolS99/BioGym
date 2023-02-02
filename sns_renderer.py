@@ -43,9 +43,11 @@ class SNS_Renderer():
             "render_modes"]
         self.render_mode = render_mode
 
-    def _render_add_description(self):
+    def _render_add_description(self, species_pop):
         for i in range(self.num_species):
-            self.axs[i * 3].set_title("species_" + str(i),
+            pop_max = species_pop[i].max()
+            self.axs[i * 3].set_title("species_" + str(i) + " (max: " +
+                                      str(pop_max) + ")",
                                       fontdict={
                                           'fontsize': 15,
                                           'fontweight': 'medium'
@@ -68,6 +70,7 @@ class SNS_Renderer():
             # Create heatmap with data from obs
             self.heatmaps[i] = sns.heatmap(species_pop[i],
                                            annot=self.display_population,
+                                           vmin=0,
                                            ax=self.axs[i * 3],
                                            linewidths=0.5,
                                            xticklabels=False,
@@ -80,7 +83,7 @@ class SNS_Renderer():
             self.heatmaps[i].axvline(x=0, color='k', linewidth=5)
             self.heatmaps[i].axvline(x=self.grid_size, color='k', linewidth=5)
 
-        self._render_add_description()
+        self._render_add_description(species_pop)
 
         # Draw protection unit
         for prot_unit_coordinates in prot_units:

@@ -16,18 +16,20 @@ class BioEnvironment():
         self.grid_size = grid_size
 
         self.diagonal_neighbours = diagonal_neighbours
-        self.migration_rate = np.array([0.10, 0.05,
-                                        0.01])  # Migration rate between cells
+        # self.migration_rate = np.array([0.10, 0.05,
+        #                                 0.01])  # Migration rate between cells
+        self.migration_rate = np.array([0.05, 0.05,
+                                        0.05])  # Migration rate between cells
 
         # self.species_ranges = [[48, 50], [11, 12], [
         #     0.01, 0.011
         # ]]  # Initial population ranges of the different species
-        self.species_ranges = [[20, 70], [9, 20], [
-            0.01, 1
+        self.species_ranges = [[0, 70], [0, 20], [
+            0, 1
         ]]  # Initial population ranges of the different species
 
         # self.extinction_threshold = [7, 0.2, 0.008]
-        self.extinction_threshold = [5, 0.01, 0.00008]
+        self.extinction_threshold = [7, 0.5, 0.0008]
 
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
