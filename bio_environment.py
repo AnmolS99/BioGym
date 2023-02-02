@@ -8,48 +8,27 @@ class BioEnvironment():
     Biological environment, containing all logic relating to the environment
     """
 
-    def __init__(self,
-                 num_species,
-                 grid_size,
-                 diagonal_neighbours=False) -> None:
+    def __init__(self, num_species, grid_size, prot_unit_size,
+                 diagonal_neighbours, migration_rate, species_ranges,
+                 extinction_threshold, r, k, a, b, e, d, a_2, b_2, e_2, d_2, s,
+                 gamma) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
+        self.prot_unit_size = prot_unit_size
 
         self.diagonal_neighbours = diagonal_neighbours
-        # self.migration_rate = np.array([0.10, 0.05,
-        #                                 0.01])  # Migration rate between cells
-        self.migration_rate = np.array([0.05, 0.05,
-                                        0.05])  # Migration rate between cells
 
-        # self.species_ranges = [[48, 50], [11, 12], [
-        #     0.01, 0.011
-        # ]]  # Initial population ranges of the different species
-        self.species_ranges = [[0, 70], [0, 20], [
-            0, 1
-        ]]  # Initial population ranges of the different species
+        self.migration_rate = np.array(
+            migration_rate)  # Migration rate between cells
 
-        # self.extinction_threshold = [7, 0.2, 0.008]
-        self.extinction_threshold = [7, 0.5, 0.0008]
+        self.species_ranges = species_ranges  # Initial population ranges of the different species
+
+        self.extinction_threshold = extinction_threshold
+
+        self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
 
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
-
-        r = 3.33  # Maximum reproduction per prey
-        k = 100  # Carrying capacity of prey in a cell
-        a = 2  # Rate of prey consumption by a mesopredator
-        b = 40  # The number at which the mesopredator consumption of the prey is half of its maximum
-
-        e = 2.1  # Conversion of prey consumption to mesopredator offspring (was 0.476 in the wildlife book)
-        d = 1  # Decrease in the mesopredator population due to natural reasons such as death
-
-        a_2 = 12.3  # Rate of mesopredator consumption by a apex predator
-        b_2 = 0.47  # The number at which the apex predator consumption of the mesopredator is half of its maximum
-        e_2 = 0.1  # Conversion of mesopredator consumption to apex predator offspring
-        d_2 = 0.6  # Decrease in the apex predator population due to natural reasons such as death
-        s = 0.4  # Maximum rate of apex predators per capita
-        gamma = 0.1  # Maximum apex predator density
-
-        self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -257,6 +236,18 @@ class BioEnvironment():
         Reseting environment
         """
         self.species_populations = self.init_species_populations()
+
+    def get_grid_size(self):
+        """
+        Returns the size of the environment grid
+        """
+        return self.grid_size
+
+    def get_prot_unit_size(self):
+        """
+        Returns the size of the environment protection unit
+        """
+        return self.prot_unit_size
 
 
 def main():
