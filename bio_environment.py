@@ -23,12 +23,14 @@ class BioEnvironment():
 
         self.species_ranges = species_ranges  # Initial population ranges of the different species
 
-        self.extinction_threshold = extinction_threshold
-
         self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
 
         self.species_populations = self.init_species_populations(
         )  # Initialize species populations
+
+        # Set the extinction thresholds
+        self.extinction_threshold = np.mean(self.species_populations,
+                                            axis=(1, 2)) * 0.10
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -183,25 +185,20 @@ class BioEnvironment():
     def sim_dispersal(self):
         "Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid"
 
-        # Create copy of species_populations
-        new_species_population = np.copy(self.species_populations)
-
         # Dispersal out from cell
-        for x in range(self.grid_size):
-            for y in range(self.grid_size):
-                new_species_population[:, x,
-                                       y] *= 1 - (self.migration_rate *
-                                                  self.get_num_cell_neighbours(
-                                                      (x, y)))
+        new_species_population = np.einsum("ijk,i->ijk",
+                                           self.species_populations,
+                                           (1 - self.migration_rate))
 
         # Dispersal into cell from neighbours
         for x in range(self.grid_size):
             for y in range(self.grid_size):
                 for neighbour in self.get_cell_neighbours((x, y)):
-                    new_species_population[:, x,
-                                           y] += self.species_populations[:, neighbour[
-                                               0], neighbour[
-                                                   1]] * self.migration_rate
+
+                    new_species_population[:, x, y] += (
+                        self.species_populations[:, neighbour[0], neighbour[1]]
+                        * self.migration_rate) / self.get_num_cell_neighbours(
+                            (neighbour[0], neighbour[1]))
         self.species_populations = new_species_population
 
     def sim_extiction(self):
@@ -254,14 +251,30 @@ def main():
     """
     Main function for running this python script.
     """
-    b = BioEnvironment(num_species=3, grid_size=3, diagonal_neighbours=False)
+    b = BioEnvironment(num_species=3,
+                       grid_size=3,
+                       prot_unit_size=3,
+                       diagonal_neighbours=False,
+                       migration_rate=[0.10, 0.05, 0.01],
+                       species_ranges=[[0, 70], [0, 20], [0, 1]],
+                       extinction_threshold=[7, 0.5, 0.0008],
+                       r=3.33,
+                       k=100,
+                       a=2,
+                       b=40,
+                       e=2.1,
+                       d=1,
+                       a_2=12.3,
+                       b_2=0.47,
+                       e_2=0.1,
+                       d_2=0.6,
+                       s=0.4,
+                       gamma=0.1)
     b.species_populations = np.array(
-        [[[7, 6, 5], [100, 200, 400], [700, 600, 100]],
-         [[30, 0.2, 10], [10, 20, 40], [70, 60, 10]],
-         [[3, 5, 1], [1, 2, 4], [7, 0.007, 1]]],
+        [[[300, 300, 300], [300, 300, 300], [300, 300, 300]],
+         [[500, 500, 500], [500, 500, 500], [500, 500, 500]],
+         [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
-    print(b.species_populations)
-    b.sim_extiction()
     print(b.species_populations)
 
 

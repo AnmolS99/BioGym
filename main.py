@@ -2,6 +2,7 @@ from config_parser import ConfigParser
 
 config_parser = ConfigParser("bio_env_configs/default2.ini")
 env = config_parser.create_bio_gym_world()
+print("Exctinction thresholds: " + str(env.bio_env.extinction_threshold))
 
 episodes = 1
 

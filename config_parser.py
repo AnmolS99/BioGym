@@ -35,8 +35,6 @@ class ConfigParser:
             self.config["BioEnvironment"]["migration_rate"])
         species_ranges = ast.literal_eval(
             self.config["BioEnvironment"]["species_ranges"])
-        extinction_threshold = ast.literal_eval(
-            self.config["BioEnvironment"]["extinction_threshold"])
 
         r = self.config["BioEnvironment"].getfloat("r")
         k = self.config["BioEnvironment"].getfloat("k")
@@ -53,8 +51,8 @@ class ConfigParser:
 
         return BioEnvironment(num_species, grid_size, prot_unit_size,
                               diagonal_neighbours, migration_rate,
-                              species_ranges, extinction_threshold, r, k, a, b,
-                              e, d, a_2, b_2, e_2, d_2, s, gamma)
+                              species_ranges, r, k, a, b, e, d, a_2, b_2, e_2,
+                              d_2, s, gamma)
 
     def create_bio_gym_world(self) -> BioGymWorld:
         num_species = int(self.config["BioGymWorld"]["num_species"])
