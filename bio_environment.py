@@ -9,9 +9,8 @@ class BioEnvironment():
     """
 
     def __init__(self, num_species, grid_size, prot_unit_size,
-                 diagonal_neighbours, migration_rate, species_ranges,
-                 extinction_threshold, r, k, a, b, e, d, a_2, b_2, e_2, d_2, s,
-                 gamma) -> None:
+                 diagonal_neighbours, migration_rate, species_ranges, r, k, a,
+                 b, e, d, a_2, b_2, e_2, d_2, s, gamma) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
         self.prot_unit_size = prot_unit_size
@@ -30,7 +29,7 @@ class BioEnvironment():
 
         # Set the extinction thresholds
         self.extinction_threshold = np.mean(self.species_populations,
-                                            axis=(1, 2)) * 0.10
+                                            axis=(1, 2)) * 0.05
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -257,7 +256,6 @@ def main():
                        diagonal_neighbours=False,
                        migration_rate=[0.10, 0.05, 0.01],
                        species_ranges=[[0, 70], [0, 20], [0, 1]],
-                       extinction_threshold=[7, 0.5, 0.0008],
                        r=3.33,
                        k=100,
                        a=2,
@@ -276,6 +274,7 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
+    print(np.mean(b.species_populations, axis=(1, 2)) * [0.15, 0.15, 0.05])
 
 
 if __name__ == '__main__':

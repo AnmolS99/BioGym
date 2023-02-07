@@ -47,7 +47,7 @@ class SNS_Renderer():
         for i in range(self.num_species):
             pop_max = species_pop[i].max()
             self.axs[i * 3].set_title("species_" + str(i) + " (max: " +
-                                      str(pop_max) + ")",
+                                      str(round(pop_max, 2)) + ")",
                                       fontdict={
                                           'fontsize': 15,
                                           'fontweight': 'medium'
