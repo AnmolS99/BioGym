@@ -28,8 +28,7 @@ class BioEnvironment():
         )  # Initialize species populations
 
         # Set the extinction thresholds
-        self.extinction_threshold = np.mean(self.species_populations,
-                                            axis=(1, 2)) * 0.05
+        self.extinction_threshold = [k * 0.05, b * 0.025, b_2 * 0.025]
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -215,11 +214,11 @@ class BioEnvironment():
         # Simulating a step in the tri-trophic system for each cell in the grid
         self.sim_grid_step()
 
-        # Simulating dispersal for the whole grid
-        self.sim_dispersal()
-
         # Simulating extinction
         self.sim_extiction()
+
+        # Simulating dispersal for the whole grid
+        self.sim_dispersal()
 
     def get_obs(self):
         """
