@@ -21,6 +21,8 @@ class SNS_Renderer():
 
         self.display_population = display_population
 
+        self.species_names = ["Prey", "Mesopredator", "Apex predator"]
+
         plt.ion()
 
         fig, axs = plt.subplots(
@@ -46,7 +48,7 @@ class SNS_Renderer():
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
             pop_max = species_pop[i].max()
-            self.axs[i * 3].set_title("species_" + str(i) + " (max: " +
+            self.axs[i * 3].set_title(self.species_names[i] + " (max: " +
                                       str(round(pop_max, 2)) + ")",
                                       fontdict={
                                           'fontsize': 15,
