@@ -48,14 +48,14 @@ class SNS_Renderer2():
                                       'fontweight': 'medium'
                                   })
 
-    def render(self, obs, prot_units):
+    def render(self, obs):
         if self.render_mode == "human":
-            return self._render_frame(obs, prot_units)
+            return self._render_frame(obs)
 
-    def _render_frame(self, obs, prot_units):
+    def _render_frame(self, obs):
 
         # Unpack observations
-        species_pop = obs
+        species_pop, prot_units = obs
 
         vmin = species_pop.min()
         vmax = species_pop.max()
@@ -91,9 +91,9 @@ class SNS_Renderer2():
         self._render_add_description()
 
         # Draw protection unit
-        for prot_unit_coordinates in prot_units:
-            self.heatmaps[0].add_patch(
-                Rectangle(prot_unit_coordinates,
+        for species, coordinates in prot_units:
+            self.heatmaps[species].add_patch(
+                Rectangle(coordinates,
                           self.protection_unit_size,
                           self.protection_unit_size,
                           fill=False,

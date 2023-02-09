@@ -23,16 +23,6 @@ class BioGymWorld(gym.Env):
         # Creating the action space
         self.action_space = spaces.Discrete(self.bio_env.get_action_space())
 
-        self.prot_units = []
-
-    def _action_to_coordinate(self, action):
-        """
-        Maps from Discrete action, which is int, to coordinates on grid of the upper left cell of the protection unit
-        """
-        x_coor = action % (self.grid_size - self.prot_unit_size + 1)
-        y_coor = action // (self.grid_size - self.prot_unit_size + 1)
-        return np.array([x_coor, y_coor])
-
     def _get_obs(self):
         return self.bio_env.get_obs()
 
@@ -57,10 +47,7 @@ class BioGymWorld(gym.Env):
         return observations, info
 
     def step(self, action):
-        # Map the action
-        protection_unit_coordinates = self._action_to_coordinate(action)
-        self.prot_units.append(protection_unit_coordinates)
-        self.bio_env.step()
+        self.bio_env.step(action)
 
         terminated = False
         reward = 1 if terminated else 0
@@ -73,8 +60,7 @@ class BioGymWorld(gym.Env):
 
     def render(self):
         obs = self._get_obs()
-        prot_units = self.prot_units
-        return self.renderer.render(obs, prot_units)
+        return self.renderer.render(obs)
 
     def close(self):
         self.renderer.close()
