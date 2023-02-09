@@ -244,6 +244,13 @@ class BioEnvironment():
         """
         return self.prot_unit_size
 
+    def get_action_space(self):
+        """
+        Returns the the action space, meaning all the possible actions
+        """
+        return (((self.grid_size - self.prot_unit_size + 1)**2) *
+                self.num_species) + 1
+
 
 def main():
     """

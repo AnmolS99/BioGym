@@ -20,8 +20,8 @@ class BioGymWorld(gym.Env):
         # Creating the observation space
         self.observation_space = spaces.Dict(species_dict)
 
-        self.action_space = spaces.Discrete(
-            (self.grid_size - self.prot_unit_size + 1)**2)
+        # Creating the action space
+        self.action_space = spaces.Discrete(self.bio_env.get_action_space())
 
         self.prot_units = []
 
