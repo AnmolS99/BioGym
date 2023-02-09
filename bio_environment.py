@@ -28,7 +28,7 @@ class BioEnvironment():
         )  # Initialize species populations
 
         # Set the extinction thresholds
-        self.extinction_threshold = [k * 0.05, b * 0.025, b_2 * 0.025]
+        self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
     def init_species_populations(self, type="numpy") -> dict:
         """
