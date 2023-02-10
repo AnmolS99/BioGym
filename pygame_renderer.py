@@ -31,9 +31,9 @@ class Pygame_Renderer():
             "render_modes"]
         self.render_mode = render_mode
 
-    def render(self, obs, prot_units):
+    def render(self, obs):
         if self.render_mode == "human":
-            return self._render_frame(obs, prot_units)
+            return self._render_frame(obs)
 
     def _render_fill_square(self, canvas, rgb_color, coordinates, sim_num):
         """
@@ -49,7 +49,7 @@ class Pygame_Renderer():
             pygame.Rect(np.array([x, y]),
                         (self.pix_square_size, self.pix_square_size)))
 
-    def _render_draw_protection_unit(self, canvas, coordinates):
+    def _render_draw_protection_unit(self, canvas, speceis, coordinates):
         """
         Drawing the protection unit, given the coordinates of the top-left corner
         NB: Coordinates are taken on the format [x, y], where x goes leftwards and y goes downwards
@@ -149,7 +149,7 @@ class Pygame_Renderer():
                                y + self.pix_square_size // 2)
         canvas.blit(pop_text, pop_textRect)
 
-    def _render_frame(self, obs, prot_units):
+    def _render_frame(self, obs):
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
@@ -167,7 +167,7 @@ class Pygame_Renderer():
         green = (0, 100, 0)
 
         # Unpack observations
-        species_pop = obs
+        species_pop, prot_units = obs
 
         for species_num in range(len(species_pop)):
             population = species_pop[species_num]
@@ -203,8 +203,8 @@ class Pygame_Renderer():
             self._render_add_description(canvas, species_num, population_max)
 
         # Draw protection unit
-        for prot_unit_coordinates in prot_units:
-            self._render_draw_protection_unit(canvas, prot_unit_coordinates)
+        for species, coordinates in prot_units:
+            self._render_draw_protection_unit(canvas, species, coordinates)
 
         if self.render_mode == "human":
             # The following line copies our drawings from 'canvas' to the visible window

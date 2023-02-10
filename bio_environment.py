@@ -30,6 +30,8 @@ class BioEnvironment():
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
+        self.prot_units = []
+
     def init_species_populations(self, type="numpy") -> dict:
         """
         Initialize populations for the different species (either as matrix (numpy) or Box (spaces))
@@ -64,6 +66,21 @@ class BioEnvironment():
                     size=(self.grid_size, self.grid_size))
 
         return species_populations
+
+    def apply_action(self, action):
+        """ 
+        Apply specified action. Action is given in the form of an integer
+        """
+        # Action = 0 means no placement of protection unit
+        if action != 0:
+            species = (action - 1) // (
+                (self.grid_size - self.prot_unit_size + 1)**2)
+            if species < 0 or species >= self.num_species:
+                raise ValueError("Invalid action")
+            x = (action - 1) % (self.grid_size - self.prot_unit_size + 1)
+            y = ((action - 1) // (self.grid_size - self.prot_unit_size + 1)
+                 ) - species * (self.grid_size - self.prot_unit_size + 1)
+            self.prot_units.append((species, [x, y]))
 
     def sim_ode(self, variables, t, params):
 
@@ -207,10 +224,13 @@ class BioEnvironment():
             self.species_populations[i][
                 self.species_populations[i] < self.extinction_threshold[i]] = 0
 
-    def step(self):
+    def step(self, action):
         """
-        Simulating a step for the whole grid
+        Simulating a step for the whole grid, after applying action
         """
+        # Apply action
+        self.apply_action(action)
+
         # Simulating a step in the tri-trophic system for each cell in the grid
         self.sim_grid_step()
 
@@ -224,7 +244,7 @@ class BioEnvironment():
         """
         Returns detailed information about the current status of the BioEnvironment
         """
-        return self.species_populations
+        return self.species_populations, self.prot_units
 
     def reset(self):
         """
@@ -243,6 +263,13 @@ class BioEnvironment():
         Returns the size of the environment protection unit
         """
         return self.prot_unit_size
+
+    def get_action_space(self):
+        """
+        Returns the the action space, meaning all the possible actions
+        """
+        return (((self.grid_size - self.prot_unit_size + 1)**2) *
+                self.num_species) + 1
 
 
 def main():
