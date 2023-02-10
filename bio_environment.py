@@ -30,7 +30,7 @@ class BioEnvironment():
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
-        self.action_units = []
+        self.action_unit = None
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -80,7 +80,7 @@ class BioEnvironment():
             x = (action - 1) % (self.grid_size - self.action_unit_size + 1)
             y = ((action - 1) // (self.grid_size - self.action_unit_size + 1)
                  ) - species * (self.grid_size - self.action_unit_size + 1)
-            self.action_units.append((species, [x, y]))
+            self.action_unit = species, [x, y]
 
     def sim_ode(self, variables, t, params):
 
@@ -277,14 +277,14 @@ class BioEnvironment():
         """
         Returns detailed information about the current status of the BioEnvironment
         """
-        return self.species_populations, self.action_units
+        return self.species_populations, self.action_unit
 
     def reset(self):
         """
         Reseting environment
         """
         self.species_populations = self.init_species_populations()
-        self.action_units = []
+        self.action_unit = None
 
     def get_grid_size(self):
         """

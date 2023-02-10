@@ -11,7 +11,7 @@ class SNS_Renderer():
                  grid_size, action_unit_size, display_population) -> None:
 
         self.grid_size = grid_size  # Number of cells in a row/column in the grid
-        self.action_unit_size = action_unit_size  # Number of row/column in the action units
+        self.action_unit_size = action_unit_size  # Number of rows/columns in the action unit
         self.pix_padding = pix_padding  # Padding between the different simulations
         self.sim_height = sim_height  # Height of simulation grids
         self.window_height = sim_height // 40  # Height of plt window
@@ -64,7 +64,7 @@ class SNS_Renderer():
     def _render_frame(self, obs):
 
         # Unpack observations
-        species_pop, action_units = obs
+        species_pop, action_unit = obs
 
         # Create heatmaps
         for i in range(self.num_species):
@@ -90,7 +90,8 @@ class SNS_Renderer():
         self._render_add_description(species_pop)
 
         # Draw action unit
-        for species, coordinates in action_units:
+        if action_unit is not None:
+            species, coordinates = action_unit
             self.heatmaps[species].add_patch(
                 Rectangle(coordinates,
                           self.action_unit_size,
