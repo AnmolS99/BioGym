@@ -14,7 +14,7 @@ class SNS_Renderer():
         self.action_unit_size = action_unit_size  # Number of row/column in the action units
         self.pix_padding = pix_padding  # Padding between the different simulations
         self.sim_height = sim_height  # Height of simulation grids
-        self.window_height = sim_height // 50  # Height of plt window
+        self.window_height = sim_height // 40  # Height of plt window
         self.window_width = self.window_height * (num_species + 1
                                                   )  # Length of plt window
         self.num_species = num_species
@@ -48,8 +48,10 @@ class SNS_Renderer():
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
             pop_max = species_pop[i].max()
-            self.axs[i * 3].set_title(self.species_names[i] + " (max: " +
-                                      str(round(pop_max, 2)) + ")",
+            pop_sum = species_pop[i].sum()
+            self.axs[i * 3].set_title(self.species_names[i] + "\nmax: " +
+                                      str(round(pop_max, 2)) +
+                                      "  --  total: " + str(round(pop_sum, 2)),
                                       fontdict={
                                           'fontsize': 15,
                                           'fontweight': 'medium'
