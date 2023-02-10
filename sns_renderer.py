@@ -8,10 +8,10 @@ class SNS_Renderer():
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
-                 grid_size, protection_unit_size, display_population) -> None:
+                 grid_size, action_unit_size, display_population) -> None:
 
         self.grid_size = grid_size  # Number of cells in a row/column in the grid
-        self.protection_unit_size = protection_unit_size  # Number of row/column in the protection units
+        self.action_unit_size = action_unit_size  # Number of row/column in the action units
         self.pix_padding = pix_padding  # Padding between the different simulations
         self.sim_height = sim_height  # Height of simulation grids
         self.window_height = sim_height // 50  # Height of plt window
@@ -62,7 +62,7 @@ class SNS_Renderer():
     def _render_frame(self, obs):
 
         # Unpack observations
-        species_pop, prot_units = obs
+        species_pop, action_units = obs
 
         # Create heatmaps
         for i in range(self.num_species):
@@ -87,12 +87,12 @@ class SNS_Renderer():
 
         self._render_add_description(species_pop)
 
-        # Draw protection unit
-        for species, coordinates in prot_units:
+        # Draw action unit
+        for species, coordinates in action_units:
             self.heatmaps[species].add_patch(
                 Rectangle(coordinates,
-                          self.protection_unit_size,
-                          self.protection_unit_size,
+                          self.action_unit_size,
+                          self.action_unit_size,
                           fill=False,
                           edgecolor='blue',
                           lw=3))

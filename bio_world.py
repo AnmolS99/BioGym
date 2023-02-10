@@ -10,7 +10,6 @@ class BioGymWorld(gym.Env):
     def __init__(self, bio_env: BioEnvironment, renderer) -> None:
         super().__init__()
         self.grid_size = bio_env.get_grid_size()
-        self.prot_unit_size = bio_env.get_prot_unit_size()
         self.renderer = renderer
 
         self.bio_env = bio_env
@@ -35,9 +34,6 @@ class BioGymWorld(gym.Env):
 
         # Choose species populations randomly
         self.bio_env.reset()
-
-        # Reset protection units
-        self.prot_units = []
 
         observations = self._get_obs()
         info = self._get_info()

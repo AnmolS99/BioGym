@@ -8,12 +8,12 @@ class BioEnvironment():
     Biological environment, containing all logic relating to the environment
     """
 
-    def __init__(self, num_species, grid_size, prot_unit_size,
+    def __init__(self, num_species, grid_size, action_unit_size,
                  diagonal_neighbours, migration_rate, species_ranges, r, k, a,
                  b, e, d, a_2, b_2, e_2, d_2, s, gamma) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
-        self.prot_unit_size = prot_unit_size
+        self.action_unit_size = action_unit_size
 
         self.diagonal_neighbours = diagonal_neighbours
 
@@ -30,7 +30,7 @@ class BioEnvironment():
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
-        self.prot_units = []
+        self.action_units = []
 
     def init_species_populations(self, type="numpy") -> dict:
         """
@@ -74,13 +74,13 @@ class BioEnvironment():
         # Action = 0 means no placement of protection unit
         if action != 0:
             species = (action - 1) // (
-                (self.grid_size - self.prot_unit_size + 1)**2)
+                (self.grid_size - self.action_unit_size + 1)**2)
             if species < 0 or species >= self.num_species:
                 raise ValueError("Invalid action")
-            x = (action - 1) % (self.grid_size - self.prot_unit_size + 1)
-            y = ((action - 1) // (self.grid_size - self.prot_unit_size + 1)
-                 ) - species * (self.grid_size - self.prot_unit_size + 1)
-            self.prot_units.append((species, [x, y]))
+            x = (action - 1) % (self.grid_size - self.action_unit_size + 1)
+            y = ((action - 1) // (self.grid_size - self.action_unit_size + 1)
+                 ) - species * (self.grid_size - self.action_unit_size + 1)
+            self.action_units.append((species, [x, y]))
 
     def sim_ode(self, variables, t, params):
 
@@ -277,13 +277,14 @@ class BioEnvironment():
         """
         Returns detailed information about the current status of the BioEnvironment
         """
-        return self.species_populations, self.prot_units
+        return self.species_populations, self.action_units
 
     def reset(self):
         """
         Reseting environment
         """
         self.species_populations = self.init_species_populations()
+        self.action_units = []
 
     def get_grid_size(self):
         """
@@ -291,17 +292,17 @@ class BioEnvironment():
         """
         return self.grid_size
 
-    def get_prot_unit_size(self):
+    def get_action_unit_size(self):
         """
         Returns the size of the environment protection unit
         """
-        return self.prot_unit_size
+        return self.action_unit_size
 
     def get_action_space(self):
         """
         Returns the the action space, meaning all the possible actions
         """
-        return (((self.grid_size - self.prot_unit_size + 1)**2) *
+        return (((self.grid_size - self.action_unit_size + 1)**2) *
                 self.num_species) + 1
 
 
@@ -311,7 +312,7 @@ def main():
     """
     b = BioEnvironment(num_species=3,
                        grid_size=3,
-                       prot_unit_size=3,
+                       action_unit_size=3,
                        diagonal_neighbours=False,
                        migration_rate=[0.10, 0.05, 0.01],
                        species_ranges=[[0, 70], [0, 20], [0, 1]],
