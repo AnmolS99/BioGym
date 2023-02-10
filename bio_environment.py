@@ -216,6 +216,39 @@ class BioEnvironment():
                             (neighbour[0], neighbour[1]))
         self.species_populations = new_species_population
 
+    def sim_dispersal_random(self):
+        "Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid"
+
+        # Dispersal out from cell
+        new_species_population = np.einsum("ijk,i->ijk",
+                                           self.species_populations,
+                                           (1 - self.migration_rate))
+
+        # Dispersal into neighbours
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                mig_pop = self.species_populations[:, x,
+                                                   y] * self.migration_rate
+
+                num_neighbours = self.get_num_cell_neighbours((x, y))
+
+                neighbour_list = self.get_cell_neighbours((x, y))
+
+                for i in range(self.num_species):
+                    prob = np.random.random(num_neighbours)
+                    prob /= prob.sum()
+                    mig_pop_i_random = mig_pop[i] * prob
+
+                    for n in range(num_neighbours):
+
+                        neighbour = neighbour_list[n]
+
+                        new_species_population[
+                            i, neighbour[0],
+                            neighbour[1]] += mig_pop_i_random[n]
+
+        self.species_populations = new_species_population
+
     def sim_extiction(self):
         """
         Simulates extinction for each species, for cells with less population than the extinction threshold
@@ -300,7 +333,7 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    print(np.mean(b.species_populations, axis=(1, 2)) * [0.15, 0.15, 0.05])
+    b.sim_dispersal_random()
 
 
 if __name__ == '__main__':
