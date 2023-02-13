@@ -75,12 +75,19 @@ class BioEnvironment():
         if action != 0:
             species = (action - 1) // (
                 (self.grid_size - self.action_unit_size + 1)**2)
+
             if species < 0 or species >= self.num_species:
                 raise ValueError("Invalid action")
             x = (action - 1) % (self.grid_size - self.action_unit_size + 1)
             y = ((action - 1) // (self.grid_size - self.action_unit_size + 1)
                  ) - species * (self.grid_size - self.action_unit_size + 1)
             self.action_unit = species, [x, y]
+
+            # Add population to the specifiec action unit.
+            # NOTE: Since x follows to the x-axis, hence it refers to columns, y refers to rows, therefore the indexing of the matrix is counter-intuitive
+            self.species_populations[
+                species, y:y + self.action_unit_size, x:x + self.
+                action_unit_size] += self.extinction_threshold[species] * 10
 
     def sim_ode(self, variables, t, params):
 
@@ -198,7 +205,10 @@ class BioEnvironment():
         return neighbours
 
     def sim_dispersal(self):
-        "Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid"
+        """
+        Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid.
+        A fixed percentage of the population leaves each cell. This population is distributed equally among the neighbours
+        """
 
         # Dispersal out from cell
         new_species_population = np.einsum("ijk,i->ijk",
@@ -217,7 +227,10 @@ class BioEnvironment():
         self.species_populations = new_species_population
 
     def sim_dispersal_random(self):
-        "Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid"
+        """
+        Simulates dispersal in and out the cell to neighbouring cells, for all cells in the grid.
+        A fixed percentage of the population leaves each cell. This population is distributed randomly among the neighbours
+        """
 
         # Dispersal out from cell
         new_species_population = np.einsum("ijk,i->ijk",
@@ -312,7 +325,7 @@ def main():
     """
     b = BioEnvironment(num_species=3,
                        grid_size=3,
-                       action_unit_size=3,
+                       action_unit_size=2,
                        diagonal_neighbours=False,
                        migration_rate=[0.10, 0.05, 0.01],
                        species_ranges=[[0, 70], [0, 20], [0, 1]],
@@ -334,7 +347,8 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.sim_dispersal_random()
+    b.apply_action(5)
+    print(b.species_populations)
 
 
 if __name__ == '__main__':
