@@ -8,13 +8,13 @@ class SNS_Renderer():
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
-                 grid_size, protection_unit_size, display_population) -> None:
+                 grid_size, action_unit_size, display_population) -> None:
 
         self.grid_size = grid_size  # Number of cells in a row/column in the grid
-        self.protection_unit_size = protection_unit_size  # Number of row/column in the protection units
+        self.action_unit_size = action_unit_size  # Number of rows/columns in the action unit
         self.pix_padding = pix_padding  # Padding between the different simulations
         self.sim_height = sim_height  # Height of simulation grids
-        self.window_height = sim_height // 50  # Height of plt window
+        self.window_height = sim_height // 40  # Height of plt window
         self.window_width = self.window_height * (num_species + 1
                                                   )  # Length of plt window
         self.num_species = num_species
@@ -48,8 +48,10 @@ class SNS_Renderer():
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
             pop_max = species_pop[i].max()
-            self.axs[i * 3].set_title(self.species_names[i] + " (max: " +
-                                      str(round(pop_max, 2)) + ")",
+            pop_sum = species_pop[i].sum()
+            self.axs[i * 3].set_title(self.species_names[i] + "\nmax: " +
+                                      str(round(pop_max, 2)) +
+                                      "  --  total: " + str(round(pop_sum, 2)),
                                       fontdict={
                                           'fontsize': 15,
                                           'fontweight': 'medium'
@@ -62,7 +64,7 @@ class SNS_Renderer():
     def _render_frame(self, obs):
 
         # Unpack observations
-        species_pop, prot_units = obs
+        species_pop, action_unit = obs
 
         # Create heatmaps
         for i in range(self.num_species):
@@ -87,12 +89,13 @@ class SNS_Renderer():
 
         self._render_add_description(species_pop)
 
-        # Draw protection unit
-        for species, coordinates in prot_units:
+        # Draw action unit
+        if action_unit is not None:
+            species, coordinates = action_unit
             self.heatmaps[species].add_patch(
                 Rectangle(coordinates,
-                          self.protection_unit_size,
-                          self.protection_unit_size,
+                          self.action_unit_size,
+                          self.action_unit_size,
                           fill=False,
                           edgecolor='blue',
                           lw=3))
