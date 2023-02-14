@@ -71,7 +71,7 @@ class BioEnvironment():
         """ 
         Apply specified action. Action is given in the form of an integer
         """
-        # Action = 0 means no placement of protection unit
+        # Action != 0 means placement of protection unit
         if action != 0:
             species = (action - 1) // (
                 (self.grid_size - self.action_unit_size + 1)**2)
@@ -88,6 +88,9 @@ class BioEnvironment():
             self.species_populations[
                 species, y:y + self.action_unit_size, x:x + self.
                 action_unit_size] += self.extinction_threshold[species] * 10
+        # Action = 0 means no placement of protection unit
+        else:
+            self.clear_action_unit()
 
     def sim_ode(self, variables, t, params):
 
@@ -286,18 +289,24 @@ class BioEnvironment():
         # Simulating dispersal for the whole grid
         self.sim_dispersal()
 
-    def get_obs(self):
-        """
-        Returns detailed information about the current status of the BioEnvironment
-        """
-        return self.species_populations, self.action_unit
-
     def reset(self):
         """
         Reseting environment
         """
         self.species_populations = self.init_species_populations()
         self.action_unit = None
+
+    def clear_action_unit(self):
+        """
+        Clear action unit, so there is no current action_unit
+        """
+        self.action_unit = None
+
+    def get_obs(self):
+        """
+        Returns detailed information about the current status of the BioEnvironment
+        """
+        return self.species_populations, self.action_unit
 
     def get_grid_size(self):
         """
