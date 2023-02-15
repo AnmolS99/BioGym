@@ -58,5 +58,12 @@ class BioGymWorld(gym.Env):
         obs = self._get_obs()
         return self.renderer.render(obs)
 
+    def show_species_history(self):
+        """
+        Show the species population history
+        """
+        pop_history = self.bio_env.get_pop_history()
+        self.renderer.render_pop_history(pop_history)
+
     def close(self):
         self.renderer.close()

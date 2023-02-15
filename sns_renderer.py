@@ -23,10 +23,19 @@ class SNS_Renderer():
 
         self.species_names = ["Prey", "Mesopredator", "Apex predator"]
 
+        self.reset()
+
+        self.heatmaps = [None] * num_species
+
+        assert render_mode is None or render_mode in self.metadata[
+            "render_modes"]
+        self.render_mode = render_mode
+
+    def reset(self):
         plt.ion()
 
         fig, axs = plt.subplots(
-            ncols=(num_species * 3) - 1,
+            ncols=(self.num_species * 3) - 1,
             gridspec_kw=dict(width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
             figsize=(self.window_width, self.window_height))
 
@@ -38,12 +47,6 @@ class SNS_Renderer():
 
         self.fig = fig
         self.axs = axs
-
-        self.heatmaps = [None] * num_species
-
-        assert render_mode is None or render_mode in self.metadata[
-            "render_modes"]
-        self.render_mode = render_mode
 
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
@@ -102,6 +105,27 @@ class SNS_Renderer():
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
+
+    def render_pop_history(self, pop_history):
+        """
+        Render species population history
+        """
+        # Close window displaying heatmaps
+        plt.close()
+
+        fig, ax = plt.subplots(self.num_species, 1)
+
+        for species_num in range(self.num_species):
+            ax[species_num].plot(pop_history[species_num])
+            ax[species_num].set_title(str(self.species_names[species_num]))
+
+        fig.supylabel('Population')
+        fig.supxlabel('Time step')
+
+        fig.tight_layout()
+
+        plt.show(block=True)
+        self.reset()
 
     def close(self):
         plt.close()
