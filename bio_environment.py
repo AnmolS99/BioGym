@@ -17,15 +17,22 @@ class BioEnvironment():
 
         self.diagonal_neighbours = diagonal_neighbours
 
-        self.migration_rate = np.array(
-            migration_rate)  # Migration rate between cells
+        # Migration rate between cells
+        self.migration_rate = np.array(migration_rate)
 
-        self.species_ranges = species_ranges  # Initial population ranges of the different species
+        # Initial population ranges of the different species
+        self.species_ranges = species_ranges
 
         self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
 
-        self.species_populations = self.init_species_populations(
-        )  # Initialize species populations
+        # List of the populations at different time steps
+        self.pop_history = [[] for _ in range(self.num_species)]
+
+        # Initialize species populations
+        self.species_populations = self.init_species_populations()
+
+        # Record populations
+        self.record_population()
 
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
@@ -289,10 +296,14 @@ class BioEnvironment():
         # Simulating dispersal for the whole grid
         self.sim_dispersal()
 
+        # Record population
+        self.record_population()
+
     def reset(self):
         """
         Reseting environment
         """
+        self.pop_history = [[] for _ in range(self.num_species)]
         self.species_populations = self.init_species_populations()
         self.action_unit = None
 
@@ -327,6 +338,14 @@ class BioEnvironment():
         return (((self.grid_size - self.action_unit_size + 1)**2) *
                 self.num_species) + 1
 
+    def record_population(self):
+        """
+        Saves the current total for each species
+        """
+        for species_num in range(self.num_species):
+            self.pop_history[species_num].append(
+                self.species_populations[species_num].sum())
+
 
 def main():
     """
@@ -356,8 +375,8 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.apply_action(5)
-    print(b.species_populations)
+    b.record_population()
+    print(b.pop_history)
 
 
 if __name__ == '__main__':
