@@ -313,6 +313,14 @@ class BioEnvironment():
         """
         self.action_unit = None
 
+    def record_population(self):
+        """
+        Saves the current total for each species
+        """
+        for species_num in range(self.num_species):
+            self.pop_history[species_num].append(
+                self.species_populations[species_num].sum())
+
     def get_obs(self):
         """
         Returns detailed information about the current status of the BioEnvironment
@@ -338,13 +346,8 @@ class BioEnvironment():
         return (((self.grid_size - self.action_unit_size + 1)**2) *
                 self.num_species) + 1
 
-    def record_population(self):
-        """
-        Saves the current total for each species
-        """
-        for species_num in range(self.num_species):
-            self.pop_history[species_num].append(
-                self.species_populations[species_num].sum())
+    def get_pop_history(self):
+        return self.pop_history
 
 
 def main():
