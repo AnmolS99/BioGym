@@ -106,7 +106,7 @@ class SNS_Renderer():
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def render_pop_history(self, pop_history):
+    def render_pop_history(self, pop_history, critical_thresholds):
         """
         Render species population history
         """
@@ -118,6 +118,9 @@ class SNS_Renderer():
         for species_num in range(self.num_species):
             ax[species_num].plot(pop_history[species_num])
             ax[species_num].set_title(str(self.species_names[species_num]))
+            ax[species_num].axhline(critical_thresholds[species_num],
+                                    linestyle='--',
+                                    color="red")
 
         fig.supylabel('Population')
         fig.supxlabel('Time step')

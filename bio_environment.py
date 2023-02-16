@@ -37,6 +37,10 @@ class BioEnvironment():
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
+        # Set critical thresholds
+        self.critical_thresholds = [(self.grid_size**2 * 5) * thresh
+                                    for thresh in self.extinction_threshold]
+
         self.action_unit = None
 
     def init_species_populations(self, type="numpy") -> dict:
@@ -347,7 +351,13 @@ class BioEnvironment():
                 self.num_species) + 1
 
     def get_pop_history(self):
+        """
+        Returns the total population for each species over time
+        """
         return self.pop_history
+
+    def get_critical_thresholds(self):
+        return self.critical_thresholds
 
 
 def main():

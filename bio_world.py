@@ -63,7 +63,8 @@ class BioGymWorld(gym.Env):
         Show the species population history
         """
         pop_history = self.bio_env.get_pop_history()
-        self.renderer.render_pop_history(pop_history)
+        critical_thresholds = self.bio_env.get_critical_thresholds()
+        self.renderer.render_pop_history(pop_history, critical_thresholds)
 
     def close(self):
         self.renderer.close()
