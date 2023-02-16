@@ -5,7 +5,7 @@ from matplotlib.patches import Rectangle
 
 class SNS_Renderer():
 
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
+    metadata = {"render_modes": ["human", "none"], "render_fps": 1}
 
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
                  grid_size, action_unit_size, display_population) -> None:
@@ -27,8 +27,7 @@ class SNS_Renderer():
 
         self.heatmaps = [None] * num_species
 
-        assert render_mode is None or render_mode in self.metadata[
-            "render_modes"]
+        assert render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
     def reset(self):
@@ -110,25 +109,26 @@ class SNS_Renderer():
         """
         Render species population history
         """
-        # Close window displaying heatmaps
-        plt.close()
+        if self.render_mode == "human":
+            # Close window displaying heatmaps
+            plt.close()
 
-        fig, ax = plt.subplots(self.num_species, 1)
+            fig, ax = plt.subplots(self.num_species, 1)
 
-        for species_num in range(self.num_species):
-            ax[species_num].plot(pop_history[species_num])
-            ax[species_num].set_title(str(self.species_names[species_num]))
-            ax[species_num].axhline(critical_thresholds[species_num],
-                                    linestyle='--',
-                                    color="red")
+            for species_num in range(self.num_species):
+                ax[species_num].plot(pop_history[species_num])
+                ax[species_num].set_title(str(self.species_names[species_num]))
+                ax[species_num].axhline(critical_thresholds[species_num],
+                                        linestyle='--',
+                                        color="red")
 
-        fig.supylabel('Population')
-        fig.supxlabel('Time step')
+            fig.supylabel('Population')
+            fig.supxlabel('Time step')
 
-        fig.tight_layout()
+            fig.tight_layout()
 
-        plt.show(block=True)
-        self.reset()
+            plt.show(block=True)
+            self.reset()
 
     def render_score_history(self, score_history):
         """
