@@ -1,6 +1,6 @@
 from config_parser import ConfigParser
 
-config_parser = ConfigParser("bio_env_configs/default2.ini")
+config_parser = ConfigParser("bio_env_configs/default3.ini")
 env = config_parser.create_bio_gym_world()
 
 episodes = 2
@@ -12,7 +12,7 @@ for i in range(1, episodes + 1):
 
     timestep = 0
 
-    while not done and timestep < 5:
+    while not done and timestep < 100:
         timestep += 1
         action = 0
         # action = env.action_space.sample() if timestep % 5 == 0 else 0
