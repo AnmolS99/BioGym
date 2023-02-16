@@ -37,6 +37,10 @@ class BioEnvironment():
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
+        # Set critical thresholds
+        self.critical_thresholds = [(self.grid_size**2 * 5) * thresh
+                                    for thresh in self.extinction_threshold]
+
         self.action_unit = None
 
     def init_species_populations(self, type="numpy") -> dict:
@@ -347,7 +351,45 @@ class BioEnvironment():
                 self.num_species) + 1
 
     def get_pop_history(self):
+        """
+        Returns the total population for each species over time
+        """
         return self.pop_history
+
+    def get_critical_thresholds(self):
+        """
+        Returns the critical thresholds for each species
+        """
+        return self.critical_thresholds
+
+    def any_species_extinct(self):
+        """
+        Returns True if one or more species are extinct
+        """
+        for population in self.species_populations:
+            if not np.any(population):
+                return True
+        return False
+
+    def is_species_critical(self, species_num):
+        """
+        Check if species is under critical threshold
+        """
+        return self.species_populations[species_num].sum(
+        ) < self.critical_thresholds[species_num]
+
+    def get_num_species_critical(self):
+        """
+        Return number of species with population under critical threshold
+        """
+        num_critical = 0
+        for species_num in range(self.num_species):
+            if self.is_species_critical(species_num):
+                num_critical += 1
+        return num_critical
+
+    def is_action_unit_placed(self):
+        return self.action_unit is not None
 
 
 def main():
@@ -378,8 +420,8 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.record_population()
-    print(b.pop_history)
+    b.critical_thresholds = [2700, 4500, 900]
+    print(b.get_num_species_critical())
 
 
 if __name__ == '__main__':

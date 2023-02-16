@@ -106,7 +106,7 @@ class SNS_Renderer():
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def render_pop_history(self, pop_history):
+    def render_pop_history(self, pop_history, critical_thresholds):
         """
         Render species population history
         """
@@ -118,11 +118,29 @@ class SNS_Renderer():
         for species_num in range(self.num_species):
             ax[species_num].plot(pop_history[species_num])
             ax[species_num].set_title(str(self.species_names[species_num]))
+            ax[species_num].axhline(critical_thresholds[species_num],
+                                    linestyle='--',
+                                    color="red")
 
         fig.supylabel('Population')
         fig.supxlabel('Time step')
 
         fig.tight_layout()
+
+        plt.show(block=True)
+        self.reset()
+
+    def render_score_history(self, score_history):
+        """
+        Render species population history
+        """
+        # Close window displaying heatmaps
+        plt.close()
+
+        plt.plot(score_history)
+
+        plt.ylabel('Score (Total reward)')
+        plt.xlabel('Episode')
 
         plt.show(block=True)
         self.reset()
