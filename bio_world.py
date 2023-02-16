@@ -45,14 +45,28 @@ class BioGymWorld(gym.Env):
     def step(self, action):
         self.bio_env.step(action)
 
-        terminated = False
-        reward = 1 if terminated else 0
+        terminated = self.bio_env.any_species_extinct()
+        reward = self.calculate_reward(terminated)
         observations = self._get_obs()
         info = self._get_info()
 
         self.render()
 
         return observations, reward, terminated, info
+
+    def calculate_reward(self, terminated):
+        """
+        Calculates the rewards, based on the current state of the BioEnvironment
+        """
+        # If simulation is terminated, at least one species has gone extinct
+        if terminated:
+            return -1000
+        else:
+            # Negative reward for each species below critical threshold
+            reward = -1 * self.bio_env.get_num_species_critical()
+            # Negative cost for placing action unit
+            reward += -0.5 if self.bio_env.is_action_unit_placed() else 0
+        return reward
 
     def render(self):
         obs = self._get_obs()
@@ -65,6 +79,12 @@ class BioGymWorld(gym.Env):
         pop_history = self.bio_env.get_pop_history()
         critical_thresholds = self.bio_env.get_critical_thresholds()
         self.renderer.render_pop_history(pop_history, critical_thresholds)
+
+    def show_score_history(self, score_history):
+        """
+        Show the score history
+        """
+        self.renderer.render_score_history(score_history)
 
     def close(self):
         self.renderer.close()

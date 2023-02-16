@@ -130,5 +130,20 @@ class SNS_Renderer():
         plt.show(block=True)
         self.reset()
 
+    def render_score_history(self, score_history):
+        """
+        Render species population history
+        """
+        # Close window displaying heatmaps
+        plt.close()
+
+        plt.plot(score_history)
+
+        plt.ylabel('Score (Total reward)')
+        plt.xlabel('Episode')
+
+        plt.show(block=True)
+        self.reset()
+
     def close(self):
         plt.close()
