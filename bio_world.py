@@ -36,6 +36,8 @@ class BioGymWorld(gym.Env):
         # Choose species populations randomly
         self.bio_env.reset()
 
+        self.renderer.reset()
+
         observations = self._get_obs()
         info = self._get_info()
 

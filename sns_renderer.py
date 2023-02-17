@@ -5,8 +5,6 @@ from matplotlib.patches import Rectangle
 
 class SNS_Renderer():
 
-    metadata = {"render_modes": ["human", "none"], "render_fps": 1}
-
     def __init__(self, render_mode, sim_height, pix_padding, num_species,
                  grid_size, action_unit_size, display_population) -> None:
 
@@ -19,16 +17,18 @@ class SNS_Renderer():
                                                   )  # Length of plt window
         self.num_species = num_species
 
-        self.display_population = display_population
-
-        self.species_names = ["Prey", "Mesopredator", "Apex predator"]
-
-        self.reset()
-
-        self.heatmaps = [None] * num_species
-
-        assert render_mode in self.metadata["render_modes"]
+        assert render_mode in ["on", "off"]
         self.render_mode = render_mode
+
+        if self.render_mode == "on":
+
+            self.display_population = display_population
+
+            self.species_names = ["Prey", "Mesopredator", "Apex predator"]
+
+            self.reset()
+
+            self.heatmaps = [None] * num_species
 
     def reset(self):
         plt.ion()
@@ -60,7 +60,7 @@ class SNS_Renderer():
                                       })
 
     def render(self, obs):
-        if self.render_mode == "human":
+        if self.render_mode == "on":
             return self._render_frame(obs)
 
     def _render_frame(self, obs):
@@ -109,7 +109,7 @@ class SNS_Renderer():
         """
         Render species population history
         """
-        if self.render_mode == "human":
+        if self.render_mode == "on":
             # Close window displaying heatmaps
             plt.close()
 
