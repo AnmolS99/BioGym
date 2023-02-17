@@ -1,13 +1,14 @@
 import gymnasium as gym
 from gymnasium import spaces
-import numpy as np
 
 from bio_environment import BioEnvironment
+from sns_renderer import SNS_Renderer
 
 
 class BioGymWorld(gym.Env):
 
-    def __init__(self, bio_env: BioEnvironment, renderer) -> None:
+    def __init__(self, bio_env: BioEnvironment,
+                 renderer: SNS_Renderer) -> None:
         super().__init__()
         self.grid_size = bio_env.get_grid_size()
         self.renderer = renderer

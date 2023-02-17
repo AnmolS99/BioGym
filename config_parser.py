@@ -1,7 +1,6 @@
 import configparser
 import ast
 
-from pygame_renderer import Pygame_Renderer
 from sns_renderer import SNS_Renderer
 from bio_environment import BioEnvironment
 from bio_world import BioGymWorld
@@ -14,17 +13,14 @@ class ConfigParser:
         self.config.read(config_filename)
 
     def create_renderer(self, num_species, grid_size, action_unit_size):
-        renderer_type = self.config["Renderer"]["renderer_type"]
         render_mode = self.config["Renderer"]["render_mode"]
         sim_height = int(self.config["Renderer"]["sim_height"])
         pix_padding = int(self.config["Renderer"]["render_pix_padding"])
         display_population = self.config["Renderer"].getboolean(
             "display_population")
 
-        renderer = self.parse_renderer_type(renderer_type)
-
-        return renderer(render_mode, sim_height, pix_padding, num_species,
-                        grid_size, action_unit_size, display_population)
+        return SNS_Renderer(render_mode, sim_height, pix_padding, num_species,
+                            grid_size, action_unit_size, display_population)
 
     def create_bio_environment(self, num_species, grid_size,
                                action_unit_size) -> BioEnvironment:
@@ -64,12 +60,3 @@ class ConfigParser:
                                         action_unit_size)
 
         return BioGymWorld(bio_env, renderer)
-
-    def parse_renderer_type(self, renderer_type):
-        if renderer_type == "pygame":
-            return Pygame_Renderer
-        elif renderer_type == "sns":
-            return SNS_Renderer
-        else:
-            raise NotImplementedError("Renderer type " + str(renderer_type) +
-                                      " not implemented.")
