@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 from gymnasium import spaces
+from numba import njit
 
 
 class BioEnvironment():
@@ -23,7 +24,8 @@ class BioEnvironment():
         # Initial population ranges of the different species
         self.species_ranges = species_ranges
 
-        self.params = [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma]
+        self.params = np.array(
+            [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma])
 
         # List of the populations at different time steps
         self.pop_history = [[] for _ in range(self.num_species)]
@@ -95,17 +97,26 @@ class BioEnvironment():
             self.action_unit = species, [x, y]
 
             # Add population to the specifiec action unit.
-            # NOTE: Since x follows to the x-axis, hence it refers to columns, y refers to rows, therefore the indexing of the matrix is counter-intuitive
-            self.species_populations[
-                species, y:y + self.action_unit_size, x:x + self.
-                action_unit_size] += self.extinction_threshold[species] * 10
+            self.add_population(species, x, y)
+
         # Action = 0 means no placement of protection unit
         else:
             self.clear_action_unit()
 
-    def sim_ode(self, variables, t, params):
+    def add_population(self, species, x, y):
+        """
+        Add population to the specifiec action unit.
+        """
+        # NOTE: Since x follows to the x-axis, hence it refers to columns, y refers to rows, therefore the indexing of the matrix is counter-intuitive
+        self.species_populations[
+            species, y:y + self.action_unit_size, x:x +
+            self.action_unit_size] += self.extinction_threshold[species] * 10
 
-        if (self.num_species != 3):
+    @staticmethod
+    @njit(cache=True)
+    def sim_ode(variables, t, params):
+
+        if (len(variables) != 3):
             raise NotImplementedError()
 
         n_1 = variables[0]
@@ -139,7 +150,6 @@ class BioEnvironment():
         """
         Simulating a step in a single cell of the grid
         """
-
         t = np.linspace(
             0, 2,
             num=2)  # Two timesteps: t0 (current state) and t1 (next state)
@@ -149,9 +159,8 @@ class BioEnvironment():
     def sim_grid_step(self):
         for x in range(self.grid_size):
             for y in range(self.grid_size):
-                old_cell_state = self.species_populations[:, x, y]
-                new_cell_state = self.sim_cell_step(old_cell_state)
-                self.species_populations[:, x, y] = new_cell_state
+                self.species_populations[:, x, y] = self.sim_cell_step(
+                    self.species_populations[:, x, y])
 
     def get_num_cell_neighbours(self, coordinates):
         """
@@ -411,7 +420,7 @@ def main():
                        a_2=12.3,
                        b_2=0.47,
                        e_2=0.1,
-                       d_2=0.6,
+                       d_2=0.3,
                        s=0.4,
                        gamma=0.1)
     b.species_populations = np.array(
@@ -420,8 +429,10 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.critical_thresholds = [2700, 4500, 900]
-    print(b.get_num_species_critical())
+    b.sim_grid_step()
+    print(b.species_populations)
+    b.sim_grid_step()
+    print(b.species_populations)
 
 
 if __name__ == '__main__':

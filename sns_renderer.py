@@ -31,6 +31,9 @@ class SNS_Renderer():
             self.heatmaps = [None] * num_species
 
     def reset(self):
+
+        plt.close()
+
         plt.ion()
 
         fig, axs = plt.subplots(
@@ -42,10 +45,10 @@ class SNS_Renderer():
         axs[2].remove()
         axs[5].remove()
 
-        plt.show()
-
         self.fig = fig
         self.axs = axs
+
+        plt.show()
 
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
