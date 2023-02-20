@@ -150,9 +150,9 @@ class BioEnvironment():
         """
         Simulating a step in a single cell of the grid
         """
-        t = np.linspace(
-            0, 2,
-            num=2)  # Two timesteps: t0 (current state) and t1 (next state)
+        # Two timesteps: t0 (current state) and t1 (next state)
+        # NOTE: t1 is two steps forward using the tri-trophic ODEs, for a more active/dynamic simulation of wildlife
+        t = np.array([0, 2])
         y = odeint(self.sim_ode, y0, t, args=(self.params, ))
         return y[1]
 
@@ -428,8 +428,6 @@ def main():
          [[500, 500, 500], [500, 500, 500], [500, 500, 500]],
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
-    print(b.species_populations)
-    b.sim_grid_step()
     print(b.species_populations)
     b.sim_grid_step()
     print(b.species_populations)

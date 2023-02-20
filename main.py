@@ -22,7 +22,7 @@ def main():
 
         start_ep = time.time()
 
-        while not done and timestep < 50:
+        while not done and timestep < 100:
             timestep += 1
             action = 0
             # action = env.action_space.sample() if timestep % 5 == 0 else 0
