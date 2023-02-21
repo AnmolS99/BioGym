@@ -17,14 +17,14 @@ class SNS_Renderer():
                                                   )  # Length of plt window
         self.num_species = num_species
 
+        self.species_names = ["Prey", "Mesopredator", "Apex predator"]
+
         assert render_mode in ["on", "off"]
         self.render_mode = render_mode
 
         if self.render_mode == "on":
 
             self.display_population = display_population
-
-            self.species_names = ["Prey", "Mesopredator", "Apex predator"]
 
             self.reset()
 
@@ -115,26 +115,26 @@ class SNS_Renderer():
         """
         Render species population history
         """
-        if self.render_mode == "on":
-            # Close window displaying heatmaps
-            plt.close()
 
-            fig, ax = plt.subplots(self.num_species, 1)
+        # Close window displaying heatmaps
+        plt.close()
 
-            for species_num in range(self.num_species):
-                ax[species_num].plot(pop_history[species_num])
-                ax[species_num].set_title(str(self.species_names[species_num]))
-                ax[species_num].axhline(critical_thresholds[species_num],
-                                        linestyle='--',
-                                        color="red")
+        fig, ax = plt.subplots(self.num_species, 1)
 
-            fig.supylabel('Population')
-            fig.supxlabel('Time step')
+        for species_num in range(self.num_species):
+            ax[species_num].plot(pop_history[species_num])
+            ax[species_num].set_title(str(self.species_names[species_num]))
+            ax[species_num].axhline(critical_thresholds[species_num],
+                                    linestyle='--',
+                                    color="red")
 
-            fig.tight_layout()
+        fig.supylabel('Population')
+        fig.supxlabel('Time step')
 
-            plt.show(block=True)
-            self.reset()
+        fig.tight_layout()
+
+        plt.show(block=True)
+        self.reset()
 
     def render_score_history(self, score_history):
         """

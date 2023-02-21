@@ -32,10 +32,10 @@ def main():
 
         duration = time.time() - start_ep
         print("---> Episode " + str(i) + ": " + str(duration))
-        # env.show_species_history()
+        env.show_species_history()
     tot_duration = time.time() - start
     print("Total time: " + str(tot_duration))
-    # env.show_score_history(score_history)
+    env.show_score_history(score_history)
     env.close()
 
 
