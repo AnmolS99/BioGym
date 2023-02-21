@@ -32,23 +32,26 @@ class SNS_Renderer():
 
     def reset(self):
 
-        plt.close()
+        if self.render_mode == "on":
 
-        plt.ion()
+            plt.close()
 
-        fig, axs = plt.subplots(
-            ncols=(self.num_species * 3) - 1,
-            gridspec_kw=dict(width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
-            figsize=(self.window_width, self.window_height))
+            plt.ion()
 
-        # Remove axes only used to add spacing between colourbar and next heatmap
-        axs[2].remove()
-        axs[5].remove()
+            fig, axs = plt.subplots(
+                ncols=(self.num_species * 3) - 1,
+                gridspec_kw=dict(
+                    width_ratios=[10, 1, 0.75, 10, 1, 0.75, 10, 1]),
+                figsize=(self.window_width, self.window_height))
 
-        self.fig = fig
-        self.axs = axs
+            # Remove axes only used to add spacing between colourbar and next heatmap
+            axs[2].remove()
+            axs[5].remove()
 
-        plt.show()
+            self.fig = fig
+            self.axs = axs
+
+            plt.show()
 
     def _render_add_description(self, species_pop):
         for i in range(self.num_species):
