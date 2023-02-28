@@ -1,8 +1,10 @@
 from config_parser import ConfigParser
+import numpy as np
 import time
 
 config_parser = ConfigParser("bio_env_configs/default3.ini")
 env = config_parser.create_bio_gym_world()
+np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
 
 def main():
@@ -25,7 +27,7 @@ def main():
         while not done and timestep < 100:
             timestep += 1
             action = 0
-            # action = env.action_space.sample() if timestep % 5 == 0 else 0
+            action = env.action_space.sample() if timestep % 1 == 0 else 0
             n_state, reward, done, info = env.step(action)
             score += reward
         score_history.append(score)

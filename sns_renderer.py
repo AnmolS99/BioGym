@@ -106,7 +106,8 @@ class SNS_Renderer():
                           self.action_unit_size,
                           fill=False,
                           edgecolor='blue',
-                          lw=3))
+                          lw=3,
+                          zorder=2))
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
