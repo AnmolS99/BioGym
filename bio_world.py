@@ -59,7 +59,7 @@ class BioGymWorld(gym.Env):
 
         self.render()
 
-        return observations, reward, terminated, info
+        return observations, reward, terminated, False, info
 
     def calculate_reward(self, terminated):
         """
@@ -76,7 +76,7 @@ class BioGymWorld(gym.Env):
         return reward
 
     def render(self):
-        obs = self._get_obs()
+        obs = self._get_obs(), self.bio_env.get_action_unit()
         return self.renderer.render(obs)
 
     def show_species_history(self):

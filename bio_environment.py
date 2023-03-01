@@ -321,13 +321,19 @@ class BioEnvironment():
         """
         Returns detailed information about the current status of the BioEnvironment
         """
-        return self.species_populations, self.action_unit
+        return self.species_populations
 
     def get_grid_size(self):
         """
         Returns the size of the environment grid
         """
         return self.grid_size
+
+    def get_action_unit(self):
+        """
+        Returns the current action unit
+        """
+        return self.action_unit
 
     def get_action_unit_size(self):
         """
