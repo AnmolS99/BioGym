@@ -5,14 +5,14 @@ import time
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/default3.ini")
+config_parser = ConfigParser("bio_env_configs/default4.ini")
 env = config_parser.create_bio_gym_world()
 
-# model = A2C("MlpPolicy", env, verbose=1)
-# model.learn(total_timesteps=10_000, progress_bar=True)
-# model.save("trained_models/A2C_test")
 
-# model = A2C.load("trained_models/A2C_test")
+def train_model():
+    model = A2C("MlpPolicy", env, verbose=1)
+    model.learn(total_timesteps=10_000, progress_bar=True)
+    model.save("trained_models/A2C_test")
 
 
 def main():
@@ -21,6 +21,8 @@ def main():
     """
     episodes = 2
     score_history = []
+
+    # model = A2C.load("trained_models/A2C_test")
 
     for i in range(1, episodes + 1):
         obs, info = env.reset()
@@ -31,7 +33,7 @@ def main():
 
         while not done and timestep < 100:
             timestep += 1
-            action = 972
+            action = 0
             # action = env.action_space.sample() if timestep % 5 == 0 else 0
             # action, _state = model.predict(obs, deterministic=True)
             obs, reward, terminated, truncated, info = env.step(action)
@@ -45,4 +47,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # train_model()
     main()

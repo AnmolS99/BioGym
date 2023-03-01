@@ -72,7 +72,7 @@ class BioGymWorld(gym.Env):
             # Negative reward for each species below critical threshold
             reward = -1 * self.bio_env.get_num_species_critical()
             # Negative cost for placing action unit
-            reward += -0.5 if self.bio_env.is_action_unit_placed() else 0
+            reward += -1.5 if self.bio_env.is_action_unit_placed() else 0
         return reward
 
     def render(self):
