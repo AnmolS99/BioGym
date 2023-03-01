@@ -1,4 +1,5 @@
 import gymnasium as gym
+import numpy as np
 from gymnasium import spaces
 
 from bio_environment import BioEnvironment
@@ -15,10 +16,13 @@ class BioGymWorld(gym.Env):
 
         self.bio_env = bio_env
 
-        species_dict = self.bio_env.init_species_populations(type="Box")
-
         # Creating the observation space
-        self.observation_space = spaces.Dict(species_dict)
+        self.observation_space = spaces.Box(0,
+                                            np.inf,
+                                            shape=(self.bio_env.num_species,
+                                                   self.grid_size,
+                                                   self.grid_size),
+                                            dtype=np.float64)
 
         # Creating the action space
         self.action_space = spaces.Discrete(self.bio_env.get_action_space())
