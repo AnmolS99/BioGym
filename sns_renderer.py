@@ -108,13 +108,18 @@ class SNS_Renderer():
 
         # Draw action unit
         if action_unit is not None:
-            species, coordinates = action_unit
+            species, coordinates, harvesting, population = action_unit
+            if harvesting:
+                edgecolor = "red"
+            else:
+                edgecolor = "blue"
+
             self.heatmaps[species].add_patch(
                 Rectangle(coordinates,
                           self.action_unit_size,
                           self.action_unit_size,
                           fill=False,
-                          edgecolor='blue',
+                          edgecolor=edgecolor,
                           lw=3,
                           zorder=2))
 

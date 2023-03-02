@@ -76,5 +76,5 @@ if __name__ == '__main__':
     # train_model()
     run(episodes=5,
         render_mode="on",
-        show_species_history=False,
-        agent_name="user")
+        show_species_history=True,
+        agent_name="random")

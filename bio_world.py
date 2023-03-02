@@ -25,7 +25,9 @@ class BioGymWorld(gym.Env):
                                             dtype=np.float64)
 
         # Creating the action space
-        self.action_space = spaces.Discrete(self.bio_env.get_action_space())
+        self.action_space = spaces.Discrete(
+            self.bio_env.get_action_space(),
+            start=self.bio_env.get_action_space_start())
 
     def _get_obs(self):
         return self.bio_env.get_obs()
