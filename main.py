@@ -1,7 +1,9 @@
 from config_parser import ConfigParser
 from stable_baselines3 import A2C
 import numpy as np
-import time
+from agents.no_action import NoAction
+from agents.random_action import RandomAction
+from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
@@ -10,19 +12,38 @@ env = config_parser.create_bio_gym_world()
 
 
 def train_model():
+    env.renderer.render_mode = "off"
     model = A2C("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=10_000, progress_bar=True)
+    model.learn(
+        total_timesteps=5_000,
+        progress_bar=True,
+    )
     model.save("trained_models/A2C_test")
 
 
-def main():
+def get_agent(name):
+    if name == "no action":
+        return NoAction()
+    elif name == "random":
+        return RandomAction(env)
+    elif name == "user":
+        return UserAction()
+    else:
+        raise NotImplementedError("Agent not implemented.")
+
+
+def run(episodes, render_mode, show_species_history, agent_name):
     """
-    Main function for running this python script.
+    Run episodes of environment with given RL agent.
     """
-    episodes = 2
     score_history = []
 
-    # model = A2C.load("trained_models/A2C_test")
+    env.renderer.render_mode = render_mode
+
+    if agent_name == "model":
+        agent = A2C.load("trained_models/A2C_test")
+    else:
+        agent = get_agent(agent_name)
 
     for i in range(1, episodes + 1):
         obs, info = env.reset()
@@ -33,19 +54,27 @@ def main():
 
         while not done and timestep < 100:
             timestep += 1
-            action = 0
-            # action = env.action_space.sample() if timestep % 5 == 0 else 0
-            # action, _state = model.predict(obs, deterministic=True)
+
+            if agent_name == "model":
+                action, _state = agent.predict(obs, deterministic=True)
+            else:
+                action = agent.predict(obs, timestep)
+
             obs, reward, terminated, truncated, info = env.step(action)
             score += reward
             done = terminated or truncated
         score_history.append(score)
 
-        # env.show_species_history()
+        if show_species_history:
+            env.show_species_history()
+
     env.show_score_history(score_history)
     env.close()
 
 
 if __name__ == '__main__':
     # train_model()
-    main()
+    run(episodes=5,
+        render_mode="on",
+        show_species_history=True,
+        agent_name="no action")
