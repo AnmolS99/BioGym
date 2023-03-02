@@ -7,7 +7,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/default4.ini")
+config_parser = ConfigParser("bio_env_configs/default5.ini")
 env = config_parser.create_bio_gym_world()
 
 
@@ -76,5 +76,5 @@ if __name__ == '__main__':
     # train_model()
     run(episodes=5,
         render_mode="on",
-        show_species_history=True,
-        agent_name="no action")
+        show_species_history=False,
+        agent_name="user")
