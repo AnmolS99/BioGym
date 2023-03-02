@@ -376,6 +376,16 @@ class BioEnvironment():
         return self.species_populations[species_num].sum(
         ) < self.critical_thresholds[species_num]
 
+    def get_critical_species(self):
+        """
+        Return array indicating species under their critical threshold
+        """
+        critical = [False for _ in range(self.num_species)]
+        for species_num in range(self.num_species):
+            if self.is_species_critical(species_num):
+                critical[species_num] = True
+        return critical
+
     def get_num_species_critical(self):
         """
         Return number of species with population under critical threshold
@@ -418,7 +428,6 @@ def main():
          [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
         dtype=np.float64)
     print(b.species_populations)
-    b.sim_grid_step()
     print(b.species_populations)
 
 

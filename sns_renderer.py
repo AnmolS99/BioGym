@@ -72,7 +72,7 @@ class SNS_Renderer():
     def _render_frame(self, obs):
 
         # Unpack observations
-        species_pop, action_unit = obs
+        species_pop, action_unit, critical_species = obs
 
         # Create heatmaps
         for i in range(self.num_species):
@@ -90,10 +90,19 @@ class SNS_Renderer():
                                            cbar_ax=self.axs[(i * 3) + 1],
                                            cmap="Greens")
 
-            self.heatmaps[i].axhline(y=0, color='k', linewidth=5)
-            self.heatmaps[i].axhline(y=self.grid_size, color='k', linewidth=5)
-            self.heatmaps[i].axvline(x=0, color='k', linewidth=5)
-            self.heatmaps[i].axvline(x=self.grid_size, color='k', linewidth=5)
+            if critical_species[i]:
+                color = "r"
+            else:
+                color = "k"
+
+            self.heatmaps[i].axhline(y=0, color=color, linewidth=5)
+            self.heatmaps[i].axhline(y=self.grid_size,
+                                     color=color,
+                                     linewidth=5)
+            self.heatmaps[i].axvline(x=0, color=color, linewidth=5)
+            self.heatmaps[i].axvline(x=self.grid_size,
+                                     color=color,
+                                     linewidth=5)
 
         self._render_add_description(species_pop)
 
