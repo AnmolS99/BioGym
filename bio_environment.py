@@ -323,6 +323,13 @@ class BioEnvironment():
         """
         return self.species_populations
 
+    def get_render_obs(self):
+        """
+        Get observations needed for the renderer
+        """
+        return self.get_obs(), self.get_action_unit(
+        ), self.get_critical_species()
+
     def get_grid_size(self):
         """
         Returns the size of the environment grid

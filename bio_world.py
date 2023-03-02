@@ -76,8 +76,7 @@ class BioGymWorld(gym.Env):
         return reward
 
     def render(self):
-        obs = self._get_obs(), self.bio_env.get_action_unit(
-        ), self.bio_env.get_critical_species()
+        obs = self.bio_env.get_render_obs()
         return self.renderer.render(obs)
 
     def show_species_history(self):
