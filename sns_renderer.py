@@ -17,14 +17,14 @@ class SNS_Renderer():
                                                   )  # Length of plt window
         self.num_species = num_species
 
+        self.display_population = display_population
+
         self.species_names = ["Prey", "Mesopredator", "Apex predator"]
 
         assert render_mode in ["on", "off"]
         self.render_mode = render_mode
 
         if self.render_mode == "on":
-
-            self.display_population = display_population
 
             self.reset()
 

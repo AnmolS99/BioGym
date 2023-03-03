@@ -348,15 +348,16 @@ class BioEnvironment():
 
     def get_obs(self):
         """
-        Returns detailed information about the current status of the BioEnvironment
+        Returns thw current state of the BioEnvironment, processed for the agent
         """
-        return self.species_populations
+        return self.normalize_species_populations(self.species_populations,
+                                                  self.num_species)
 
     def get_render_obs(self):
         """
         Get observations needed for the renderer
         """
-        return self.get_obs(), self.get_action_unit(
+        return self.species_populations, self.get_action_unit(
         ), self.get_critical_species()
 
     def get_grid_size(self):
@@ -441,6 +442,23 @@ class BioEnvironment():
 
     def is_action_unit_placed(self):
         return self.action_unit is not None
+
+    @staticmethod
+    def normalize_species_populations(species_populations, num_species):
+        """
+        Returns a copy of species_population, where each species population matrix is normalized
+        """
+        species_pop_copy = np.copy(species_populations)
+        for species_num in range(num_species):
+            species_pop = species_pop_copy[species_num]
+            # If matrix only consists of one value
+            if np.min(species_pop) == np.max(species_pop):
+                species_pop_copy[species_num] = np.zeros(species_pop.shape)
+                continue
+            species_pop_copy[species_num] = (
+                species_pop - np.min(species_pop)) / (np.max(species_pop) -
+                                                      np.min(species_pop))
+        return species_pop_copy
 
 
 def main():
