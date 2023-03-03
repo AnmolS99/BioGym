@@ -73,7 +73,7 @@ def run(episodes, render_mode, show_species_history, agent_name):
 
 
 if __name__ == '__main__':
-    train_model()
+    # train_model()
     run(episodes=20,
         render_mode="on",
         show_species_history=True,
