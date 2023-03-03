@@ -53,10 +53,11 @@ class ConfigParser:
         num_species = int(self.config["BioGymWorld"]["num_species"])
         grid_size = int(self.config["BioGymWorld"]["grid_size"])
         action_unit_size = int(self.config["BioGymWorld"]["action_unit_size"])
+        max_steps = int(self.config["BioGymWorld"]["max_steps"])
 
         bio_env = self.create_bio_environment(num_species, grid_size,
                                               action_unit_size)
         renderer = self.create_renderer(num_species, grid_size,
                                         action_unit_size)
 
-        return BioGymWorld(bio_env, renderer)
+        return BioGymWorld(bio_env, renderer, max_steps)

@@ -50,19 +50,17 @@ def run(episodes, render_mode, show_species_history, agent_name):
         done = False
         score = 0
 
-        timestep = 0
-
-        while not done and timestep < 100:
-            timestep += 1
+        while not done:
 
             if agent_name == "model":
                 action, _state = agent.predict(obs, deterministic=True)
             else:
-                action = agent.predict(obs, timestep)
+                action = agent.predict(obs, env.current_step)
 
             obs, reward, terminated, truncated, info = env.step(action)
             score += reward
             done = terminated or truncated
+
         score_history.append(score)
 
         if show_species_history:
@@ -72,9 +70,15 @@ def run(episodes, render_mode, show_species_history, agent_name):
     env.close()
 
 
+def test():
+    for _ in range(100):
+        print(env.action_space.sample())
+
+
 if __name__ == '__main__':
-    # train_model()
-    run(episodes=5,
-        render_mode="on",
-        show_species_history=True,
-        agent_name="random")
+    train_model()
+    # run(episodes=10,
+    #     render_mode="off",
+    #     show_species_history=False,
+    #     agent_name="model")
+    # test()
