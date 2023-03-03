@@ -1,7 +1,7 @@
 class NoAction:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, env) -> None:
+        self.env = env
 
     def predict(self, obs, timestep):
-        return 0
+        return self.env.bio_env.get_no_action()

@@ -29,9 +29,7 @@ class BioGymWorld(gym.Env):
                                             dtype=np.float64)
 
         # Creating the action space
-        self.action_space = spaces.Discrete(
-            self.bio_env.get_action_space(),
-            start=self.bio_env.get_action_space_start())
+        self.action_space = spaces.Discrete(self.bio_env.get_action_space())
 
     def _get_obs(self):
         return self.bio_env.get_obs()
@@ -59,8 +57,6 @@ class BioGymWorld(gym.Env):
 
     def step(self, action):
         self.current_step += 1
-
-        print("ACTION: " + str(action))
 
         self.bio_env.step(action)
 
@@ -90,9 +86,9 @@ class BioGymWorld(gym.Env):
             if self.bio_env.is_action_unit_placed():
                 _, _, harvesting, _ = self.bio_env.get_action_unit()
                 if harvesting:
-                    reward += 1
+                    reward += 0
                 else:
-                    reward -= 0.5
+                    reward += 0
         return reward
 
     def render(self):

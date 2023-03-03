@@ -67,21 +67,26 @@ class BioEnvironment():
         """ 
         Apply specified action. Action is given in the form of an integer
         """
-        # Action != 0 means harvesting/adding individuals of species
-        if action != 0:
-            if action < 0:
+        # Action > 0 means action unit placement
+        if action >= 0 and action < self.get_action_space():
+            action_offset = action - ((self.get_action_space() - 1) // 2)
+
+            # Action = 0 means no placement of protection unit
+            if action_offset == 0:
+                self.clear_action_unit()
+                return
+
+            if action_offset < 0:
                 harvesting = True
             else:
                 harvesting = False
 
-            species = (abs(action) - 1) // (
+            species = (abs(action_offset) - 1) // (
                 (self.grid_size - self.action_unit_size + 1)**2)
 
-            if species < 0 or species >= self.num_species:
-                raise ValueError("Invalid action")
-            x = (abs(action) - 1) % (self.grid_size - self.action_unit_size +
-                                     1)
-            y = ((abs(action) - 1) //
+            x = (abs(action_offset) - 1) % (self.grid_size -
+                                            self.action_unit_size + 1)
+            y = ((abs(action_offset) - 1) //
                  (self.grid_size - self.action_unit_size +
                   1)) - species * (self.grid_size - self.action_unit_size + 1)
 
@@ -93,9 +98,8 @@ class BioEnvironment():
                 population = self.add_population(species, x, y)
 
             self.action_unit = species, [x, y], harvesting, population
-        # Action = 0 means no placement of protection unit
         else:
-            self.clear_action_unit()
+            raise ValueError("Invalid action: " + str(action))
 
     def harvest_population(self, species, x, y):
         """
@@ -380,12 +384,12 @@ class BioEnvironment():
         return ((((self.grid_size - self.action_unit_size + 1)**2) *
                  self.num_species) * 2) + 1
 
-    def get_action_space_start(self):
+    def get_no_action(self):
         """
-        Returns the start of the action space
+        Get the action that is equal to no action unit placed
         """
-        return -(((self.grid_size - self.action_unit_size + 1)**2) *
-                 self.num_species)
+        return (
+            (self.grid_size - self.action_unit_size + 1)**2) * self.num_species
 
     def get_pop_history(self):
         """
