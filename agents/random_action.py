@@ -9,4 +9,4 @@ class RandomAction:
         if timestep % self.interval == 0:
             return self.env.action_space.sample()
         else:
-            return 0
+            return self.env.bio_env.get_no_action()

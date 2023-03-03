@@ -8,13 +8,17 @@ from sns_renderer import SNS_Renderer
 
 class BioGymWorld(gym.Env):
 
-    def __init__(self, bio_env: BioEnvironment,
-                 renderer: SNS_Renderer) -> None:
+    def __init__(self, bio_env: BioEnvironment, renderer: SNS_Renderer,
+                 max_steps: int) -> None:
         super().__init__()
         self.grid_size = bio_env.get_grid_size()
         self.renderer = renderer
 
         self.bio_env = bio_env
+
+        self.max_steps = max_steps
+
+        self.current_step = 0
 
         # Creating the observation space
         self.observation_space = spaces.Box(0,
@@ -34,13 +38,15 @@ class BioGymWorld(gym.Env):
         return {"info": "Placeholder for information"}
 
     def reset(self, seed=None, options=None):
-        # We need the following line to seedself.np_random
+        # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
         # Choose species populations randomly
         self.bio_env.reset()
 
         self.renderer.reset()
+
+        self.current_step = 0
 
         observations = self._get_obs()
         info = self._get_info()
@@ -50,6 +56,8 @@ class BioGymWorld(gym.Env):
         return observations, info
 
     def step(self, action):
+        self.current_step += 1
+
         self.bio_env.step(action)
 
         terminated = self.bio_env.any_species_extinct()
@@ -58,6 +66,9 @@ class BioGymWorld(gym.Env):
         info = self._get_info()
 
         self.render()
+
+        if self.current_step == self.max_steps:
+            return observations, reward, terminated, True, info
 
         return observations, reward, terminated, False, info
 
@@ -72,7 +83,12 @@ class BioGymWorld(gym.Env):
             # Negative reward for each species below critical threshold
             reward = -1 * self.bio_env.get_num_species_critical()
             # Negative cost for placing action unit
-            reward += -1.5 if self.bio_env.is_action_unit_placed() else 0
+            if self.bio_env.is_action_unit_placed():
+                _, _, harvesting, _ = self.bio_env.get_action_unit()
+                if harvesting:
+                    reward += 0
+                else:
+                    reward += 0
         return reward
 
     def render(self):
