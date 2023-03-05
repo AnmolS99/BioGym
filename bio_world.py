@@ -21,12 +21,19 @@ class BioGymWorld(gym.Env):
         self.current_step = 0
 
         # Creating the observation space
-        self.observation_space = spaces.Box(0,
-                                            np.inf,
-                                            shape=(self.bio_env.num_species,
-                                                   self.grid_size,
-                                                   self.grid_size),
-                                            dtype=np.float64)
+        self.observation_space = spaces.Dict({
+            "species_populations":
+            spaces.Box(0,
+                       np.inf,
+                       shape=(self.bio_env.num_species, self.grid_size,
+                              self.grid_size),
+                       dtype=np.float64),
+            "criticalness":
+            spaces.Box(0,
+                       np.inf,
+                       shape=(self.bio_env.num_species, ),
+                       dtype=np.float64)
+        })
 
         # Creating the action space
         self.action_space = spaces.Discrete(self.bio_env.get_action_space())

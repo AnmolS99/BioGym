@@ -350,8 +350,16 @@ class BioEnvironment():
         """
         Returns thw current state of the BioEnvironment, processed for the agent
         """
-        return self.normalize_species_populations(self.species_populations,
-                                                  self.num_species)
+        # return self.normalize_species_populations(self.species_populations,
+        #                                           self.num_species)
+        # return self.scale_species_populations()
+        return {
+            "species_populations":
+            self.normalize_species_populations(self.species_populations,
+                                               self.num_species),
+            "criticalness":
+            self.get_criticalness()
+        }
 
     def get_render_obs(self):
         """
@@ -440,6 +448,13 @@ class BioEnvironment():
                 num_critical += 1
         return num_critical
 
+    def get_criticalness(self):
+        criticalness = []
+        for species_num in range(self.num_species):
+            criticalness.append(self.species_populations[species_num].sum() /
+                                self.critical_thresholds[species_num])
+        return np.array(criticalness)
+
     def is_action_unit_placed(self):
         return self.action_unit is not None
 
@@ -458,6 +473,16 @@ class BioEnvironment():
             species_pop_copy[species_num] = (
                 species_pop - np.min(species_pop)) / (np.max(species_pop) -
                                                       np.min(species_pop))
+        return species_pop_copy
+
+    def scale_species_populations(self):
+        """
+        Returns a copy of species populations, where each species matrix is scaled based on their extinction threshold
+        """
+        species_pop_copy = np.copy(self.species_populations)
+        for species_num in range(self.num_species):
+            species_pop_copy[species_num] = species_pop_copy[
+                species_num] / self.extinction_threshold[species_num]
         return species_pop_copy
 
 
