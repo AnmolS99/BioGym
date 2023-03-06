@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.integrate import odeint
-from gymnasium import spaces
 from numba import njit
 
 
@@ -10,13 +9,17 @@ class BioEnvironment():
     """
 
     def __init__(self, num_species, grid_size, action_unit_size,
-                 diagonal_neighbours, migration_rate, species_ranges, r, k, a,
-                 b, e, d, a_2, b_2, e_2, d_2, s, gamma) -> None:
+                 diagonal_neighbours, reduced_actions, migration_rate,
+                 species_ranges, r, k, a, b, e, d, a_2, b_2, e_2, d_2, s,
+                 gamma) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
         self.action_unit_size = action_unit_size
 
         self.diagonal_neighbours = diagonal_neighbours
+
+        self.reduced_actions = reduced_actions
+        self.validate_action_unit_size()
 
         # Migration rate between cells
         self.migration_rate = np.array(migration_rate)
@@ -81,14 +84,19 @@ class BioEnvironment():
             else:
                 harvesting = False
 
-            species = (abs(action_offset) - 1) // (
-                (self.grid_size - self.action_unit_size + 1)**2)
+            if self.reduced_actions:
+                num_row_action_units = self.grid_size // self.action_unit_size
+            else:
+                num_row_action_units = self.grid_size - self.action_unit_size + 1
 
-            x = (abs(action_offset) - 1) % (self.grid_size -
-                                            self.action_unit_size + 1)
+            species = (abs(action_offset) - 1) // (num_row_action_units**2)
+            x = (abs(action_offset) - 1) % num_row_action_units
             y = ((abs(action_offset) - 1) //
-                 (self.grid_size - self.action_unit_size +
-                  1)) - species * (self.grid_size - self.action_unit_size + 1)
+                 num_row_action_units) - species * num_row_action_units
+
+            if self.reduced_actions:
+                x *= self.action_unit_size
+                y *= self.action_unit_size
 
             if harvesting:
                 # Harvest population to the specific action unit.
@@ -386,19 +394,42 @@ class BioEnvironment():
         """
         return self.action_unit_size
 
+    def validate_action_unit_size(self):
+        """
+        Validate if action unit is compatible with grid size
+        """
+        if self.action_unit_size < 0 or self.action_unit_size > self.grid_size:
+            raise ValueError("Action unit size invalid: " +
+                             str(self.action_unit_size) + " (grid size: " +
+                             str(self.grid_size) + ")")
+        elif self.reduced_actions and (self.grid_size % self.action_unit_size
+                                       != 0):
+            raise ValueError(
+                "Action unit size invalid: " + str(self.action_unit_size) +
+                " (grid size: " + str(self.grid_size) +
+                "), Action unit size needs to be a factor of grid size.")
+
     def get_action_space(self):
         """
         Returns the action space, meaning all the possible actions
         """
-        return ((((self.grid_size - self.action_unit_size + 1)**2) *
-                 self.num_species) * 2) + 1
+        if self.reduced_actions:
+            return (((self.grid_size // self.action_unit_size)**2) *
+                    self.num_species * 2) + 1
+        else:
+            return ((((self.grid_size - self.action_unit_size + 1)**2) *
+                     self.num_species) * 2) + 1
 
     def get_no_action(self):
         """
         Get the action that is equal to no action unit placed
         """
-        return (
-            (self.grid_size - self.action_unit_size + 1)**2) * self.num_species
+        if self.reduced_actions:
+            return ((self.grid_size // self.action_unit_size)**
+                    2) * self.num_species
+        else:
+            return ((self.grid_size - self.action_unit_size + 1)**
+                    2) * self.num_species
 
     def get_pop_history(self):
         """

@@ -9,7 +9,7 @@ from sns_renderer import SNS_Renderer
 class BioGymWorld(gym.Env):
 
     def __init__(self, bio_env: BioEnvironment, renderer: SNS_Renderer,
-                 max_steps: int) -> None:
+                 max_steps: int, reduced_actions: bool) -> None:
         super().__init__()
         self.grid_size = bio_env.get_grid_size()
         self.renderer = renderer
@@ -17,6 +17,8 @@ class BioGymWorld(gym.Env):
         self.bio_env = bio_env
 
         self.max_steps = max_steps
+
+        self.reduced_actions = reduced_actions
 
         self.current_step = 0
 

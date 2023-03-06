@@ -1,5 +1,5 @@
 from config_parser import ConfigParser
-from stable_baselines3 import DQN
+from stable_baselines3 import A2C, DQN
 import numpy as np
 from agents.no_action import NoAction
 from agents.random_action import RandomAction
@@ -10,12 +10,13 @@ np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 config_parser = ConfigParser("bio_env_configs/default5.ini")
 env = config_parser.create_bio_gym_world()
 
-model_path = "trained_models/DQN_test"
+model_type = A2C
+model_path = "trained_models/model_test"
 
 
 def train_model():
     env.renderer.render_mode = "off"
-    model = DQN("MultiInputPolicy", env, verbose=1)
+    model = model_type("MultiInputPolicy", env, verbose=1)
     model.learn(
         total_timesteps=10_000,
         progress_bar=True,
@@ -43,7 +44,7 @@ def run(episodes, render_mode, show_species_history, agent_name):
     env.renderer.render_mode = render_mode
 
     if agent_name == "model":
-        agent = DQN.load(model_path)
+        agent = model_type.load(model_path)
     else:
         agent = get_agent(agent_name)
 
@@ -73,8 +74,8 @@ def run(episodes, render_mode, show_species_history, agent_name):
 
 
 if __name__ == '__main__':
-    train_model()
+    # train_model()
     run(episodes=20,
-        render_mode="off",
-        show_species_history=False,
+        render_mode="on",
+        show_species_history=True,
         agent_name="model")
