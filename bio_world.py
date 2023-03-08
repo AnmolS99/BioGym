@@ -34,6 +34,11 @@ class BioGymWorld(gym.Env):
             spaces.Box(0,
                        np.inf,
                        shape=(self.bio_env.num_species, ),
+                       dtype=np.float64),
+            "criticalness_trend":
+            spaces.Box(0,
+                       np.inf,
+                       shape=(self.bio_env.num_species, ),
                        dtype=np.float64)
         })
 
@@ -89,15 +94,19 @@ class BioGymWorld(gym.Env):
         if terminated:
             return -1000
         else:
+            reward = 0
             # Negative reward for each species below critical threshold
-            reward = -1 * self.bio_env.get_num_species_critical()
-            # Negative cost for placing action unit
             if self.bio_env.is_action_unit_placed():
                 _, _, harvesting, _ = self.bio_env.get_action_unit()
                 if harvesting:
-                    reward += 0
+                    reward += -0.25
                 else:
-                    reward += 0
+                    reward += -0.25
+            if self.bio_env.get_num_species_critical() > 0:
+                reward += -1
+            else:
+                reward += 1
+            # Negative cost for placing action unit
         return reward
 
     def render(self):

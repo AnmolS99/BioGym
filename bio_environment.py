@@ -43,8 +43,15 @@ class BioEnvironment():
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
 
         # Set critical thresholds
-        self.critical_thresholds = [(self.grid_size**2 * 5) * thresh
-                                    for thresh in self.extinction_threshold]
+        base_threshold = (self.grid_size**2 * 5)
+        species_thresh_const = [1, 1.1, 1]
+
+        self.critical_thresholds = [
+            self.extinction_threshold[i] * base_threshold *
+            species_thresh_const[i] for i in range(self.num_species)
+        ]
+
+        self.prev_criticalness = None
 
         self.action_unit = None
 
@@ -317,6 +324,9 @@ class BioEnvironment():
         """
         Simulating a step for the whole grid, after applying action
         """
+        # Setting prev_criticalness before changing the environment
+        self.prev_criticalness = self.get_criticalness()
+
         # Apply action
         self.apply_action(action)
 
@@ -339,6 +349,7 @@ class BioEnvironment():
         self.pop_history = [[] for _ in range(self.num_species)]
         self.species_populations = self.init_species_populations()
         self.action_unit = None
+        self.prev_criticalness = None
 
     def clear_action_unit(self):
         """
@@ -356,17 +367,13 @@ class BioEnvironment():
 
     def get_obs(self):
         """
-        Returns thw current state of the BioEnvironment, processed for the agent
+        Returns the current state of the BioEnvironment, processed for the agent
         """
-        # return self.normalize_species_populations(self.species_populations,
-        #                                           self.num_species)
-        # return self.scale_species_populations()
+
         return {
-            "species_populations":
-            self.normalize_species_populations(self.species_populations,
-                                               self.num_species),
-            "criticalness":
-            self.get_criticalness()
+            "species_populations": self.scale_species_populations(),
+            "criticalness": self.get_criticalness(),
+            "criticalness_trend": self.get_criticalness_trend()
         }
 
     def get_render_obs(self):
@@ -482,9 +489,18 @@ class BioEnvironment():
     def get_criticalness(self):
         criticalness = []
         for species_num in range(self.num_species):
-            criticalness.append(self.species_populations[species_num].sum() /
-                                self.critical_thresholds[species_num])
+            criticalness.append((self.species_populations[species_num].sum() /
+                                 self.critical_thresholds[species_num]))
         return np.array(criticalness)
+
+    def get_prev_criticalness(self):
+        if self.prev_criticalness is None:
+            return self.get_criticalness()
+        else:
+            return self.prev_criticalness
+
+    def get_criticalness_trend(self):
+        return self.get_criticalness() - self.get_prev_criticalness()
 
     def is_action_unit_placed(self):
         return self.action_unit is not None
@@ -492,28 +508,66 @@ class BioEnvironment():
     @staticmethod
     def normalize_species_populations(species_populations, num_species):
         """
-        Returns a copy of species_population, where each species population matrix is normalized
+        Returns a copy of species_population, where each species population matrix is normalized between [0, 1]
         """
         species_pop_copy = np.copy(species_populations)
+        # Normalize every species matrix
         for species_num in range(num_species):
             species_pop = species_pop_copy[species_num]
             # If matrix only consists of one value
             if np.min(species_pop) == np.max(species_pop):
-                species_pop_copy[species_num] = np.zeros(species_pop.shape)
+                # species_pop_copy[species_num] = np.zeros(species_pop.shape)
+                species_pop_copy[species_num] = np.ones(species_pop.shape)
                 continue
-            species_pop_copy[species_num] = (
-                species_pop - np.min(species_pop)) / (np.max(species_pop) -
-                                                      np.min(species_pop))
+            # species_pop_copy[species_num] = (
+            #     species_pop - np.min(species_pop)) / (np.max(species_pop) -
+            #                                           np.min(species_pop))
+            species_pop_copy[species_num] = species_pop / np.max(species_pop)
         return species_pop_copy
+
+    def action_unit_obs(self, species_populations):
+        """
+        Reduce observation space by returning average of every action unit (harvesting/adding both count as one), instead of value in every cell
+        """
+        actions_start = 1
+        actions_end = (self.get_action_space() - 1) // 2
+
+        if self.reduced_actions:
+            num_row_action_units = self.grid_size // self.action_unit_size
+        else:
+            num_row_action_units = self.grid_size - self.action_unit_size + 1
+
+        obs = np.zeros(
+            (self.num_species, num_row_action_units, num_row_action_units))
+
+        for action in range(actions_start, actions_end + 1):
+            species = (action - 1) // (num_row_action_units**2)
+            au_x = (action - 1) % num_row_action_units  # Action unit x
+            au_y = ((action - 1) // num_row_action_units
+                    ) - species * num_row_action_units  # Action unit y
+
+            if self.reduced_actions:
+                x = au_x * self.action_unit_size
+                y = au_y * self.action_unit_size
+            else:
+                x = au_x
+                y = au_y
+
+            obs[species, au_y,
+                au_x] = species_populations[species,
+                                            y:y + self.action_unit_size,
+                                            x:x + self.action_unit_size].sum()
+
+        return obs
 
     def scale_species_populations(self):
         """
-        Returns a copy of species populations, where each species matrix is scaled based on their extinction threshold
+        Returns a copy of species populations, where each species matrix is scaled based on their critical threshold
         """
         species_pop_copy = np.copy(self.species_populations)
         for species_num in range(self.num_species):
             species_pop_copy[species_num] = species_pop_copy[
-                species_num] / self.extinction_threshold[species_num]
+                species_num] / self.critical_thresholds[species_num]
         return species_pop_copy
 
 
@@ -522,9 +576,10 @@ def main():
     Main function for running this python script.
     """
     b = BioEnvironment(num_species=3,
-                       grid_size=3,
+                       grid_size=6,
                        action_unit_size=2,
                        diagonal_neighbours=False,
+                       reduced_actions=False,
                        migration_rate=[0.10, 0.05, 0.01],
                        species_ranges=[[0, 70], [0, 20], [0, 1]],
                        r=3.33,
@@ -540,13 +595,19 @@ def main():
                        s=0.4,
                        gamma=0.1)
     b.species_populations = np.array(
-        [[[300, 300, 300], [300, 300, 300], [300, 300, 300]],
-         [[500, 500, 500], [500, 500, 500], [500, 500, 500]],
-         [[100, 100, 100], [100, 100, 100], [100, 100, 100]]],
+        [[[100, 50, 60, 70, 180, 90], [30, 40, 50, 60, 70, 80],
+          [90, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110],
+          [120, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110]],
+         [[300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300],
+          [300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300],
+          [300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300]],
+         [[100, 50, 60, 70, 80, 90], [30, 40, 50, 60, 70, 80],
+          [90, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110],
+          [120, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110]]],
         dtype=np.float64)
     print(b.species_populations)
-    print("-----------------")
-    print(b.species_populations)
+    print(b.scale_species_populations())
+    print(b.action_unit_obs(b.scale_species_populations()))
 
 
 if __name__ == '__main__':

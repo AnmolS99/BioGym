@@ -1,5 +1,5 @@
 from config_parser import ConfigParser
-from stable_baselines3 import A2C, DQN
+from stable_baselines3 import A2C, DQN, PPO
 import numpy as np
 from agents.no_action import NoAction
 from agents.random_action import RandomAction
@@ -10,13 +10,16 @@ np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 config_parser = ConfigParser("bio_env_configs/default5.ini")
 env = config_parser.create_bio_gym_world()
 
-model_type = A2C
+model_type = PPO
 model_path = "trained_models/model_test"
 
 
 def train_model():
     env.renderer.render_mode = "off"
-    model = model_type("MultiInputPolicy", env, verbose=1)
+    model = model_type("MultiInputPolicy",
+                       env,
+                       verbose=1,
+                       tensorboard_log="./logs/")
     model.learn(
         total_timesteps=10_000,
         progress_bar=True,
@@ -30,7 +33,7 @@ def get_agent(name):
     elif name == "random":
         return RandomAction(env)
     elif name == "user":
-        return UserAction()
+        return UserAction(env)
     else:
         raise NotImplementedError("Agent not implemented.")
 
@@ -68,14 +71,15 @@ def run(episodes, render_mode, show_species_history, agent_name):
 
         if show_species_history:
             env.show_species_history()
-
+    print("Average episode score: " +
+          str(sum(score_history) / len(score_history)))
     env.show_score_history(score_history)
     env.close()
 
 
 if __name__ == '__main__':
-    # train_model()
-    run(episodes=20,
-        render_mode="on",
-        show_species_history=True,
+    train_model()
+    run(episodes=10,
+        render_mode="off",
+        show_species_history=False,
         agent_name="model")
