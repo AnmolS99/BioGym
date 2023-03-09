@@ -1,5 +1,5 @@
 from config_parser import ConfigParser
-from stable_baselines3 import A2C, DQN, PPO
+from stable_baselines3 import DQN, A2C, PPO
 import numpy as np
 from agents.no_action import NoAction
 from agents.random_action import RandomAction
@@ -21,7 +21,7 @@ def train_model():
                        verbose=1,
                        tensorboard_log="./logs/")
     model.learn(
-        total_timesteps=10_000,
+        total_timesteps=100_000,
         progress_bar=True,
     )
     model.save(model_path)
@@ -38,7 +38,11 @@ def get_agent(name):
         raise NotImplementedError("Agent not implemented.")
 
 
-def run(episodes, render_mode, show_species_history, agent_name):
+def run(episodes,
+        render_mode,
+        show_species_history,
+        agent_name,
+        model_name=None):
     """
     Run episodes of environment with given RL agent.
     """
@@ -47,7 +51,10 @@ def run(episodes, render_mode, show_species_history, agent_name):
     env.renderer.render_mode = render_mode
 
     if agent_name == "model":
-        agent = model_type.load(model_path)
+        if model_name is not None:
+            agent = model_type.load(model_name)
+        else:
+            agent = model_type.load(model_path)
     else:
         agent = get_agent(agent_name)
 
@@ -78,8 +85,9 @@ def run(episodes, render_mode, show_species_history, agent_name):
 
 
 if __name__ == '__main__':
-    train_model()
-    run(episodes=10,
-        render_mode="off",
-        show_species_history=False,
-        agent_name="model")
+    # train_model()
+    run(episodes=2,
+        render_mode="on",
+        show_species_history=True,
+        agent_name="model",
+        model_name="trained_models/PPO_100k")
