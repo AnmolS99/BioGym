@@ -21,7 +21,7 @@ def train_model():
                        verbose=1,
                        tensorboard_log="./logs/")
     model.learn(
-        total_timesteps=100_000,
+        total_timesteps=150_000,
         progress_bar=True,
     )
     model.save(model_path)
@@ -86,8 +86,8 @@ def run(episodes,
 
 if __name__ == '__main__':
     # train_model()
-    run(episodes=2,
-        render_mode="on",
-        show_species_history=True,
+    run(episodes=10,
+        render_mode="off",
+        show_species_history=False,
         agent_name="model",
-        model_name="trained_models/PPO_100k")
+        model_name="trained_models/PPO_150k_au_4x4")
