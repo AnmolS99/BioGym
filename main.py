@@ -11,7 +11,7 @@ config_parser = ConfigParser("bio_env_configs/default5.ini")
 env = config_parser.create_bio_gym_world()
 
 model_type = PPO
-model_path = "trained_models/model_test"
+model_log_name = "PPO_100k"
 
 
 def train_model():
@@ -20,11 +20,10 @@ def train_model():
                        env,
                        verbose=1,
                        tensorboard_log="./logs/")
-    model.learn(
-        total_timesteps=150_000,
-        progress_bar=True,
-    )
-    model.save(model_path)
+    model.learn(total_timesteps=100_000,
+                progress_bar=True,
+                tb_log_name=model_log_name)
+    model.save("trained_models/" + model_log_name)
 
 
 def get_agent(name):
@@ -40,21 +39,23 @@ def get_agent(name):
 
 def run(episodes,
         render_mode,
-        show_species_history,
+        show_episode_history,
         agent_name,
         model_name=None):
     """
     Run episodes of environment with given RL agent.
     """
     score_history = []
+    species_richness_history = []
+    species_evenness_history = []
 
     env.renderer.render_mode = render_mode
 
     if agent_name == "model":
         if model_name is not None:
-            agent = model_type.load(model_name)
+            agent = model_type.load("trained_models/" + model_name)
         else:
-            agent = model_type.load(model_path)
+            agent = model_type.load("trained_models/" + model_log_name)
     else:
         agent = get_agent(agent_name)
 
@@ -75,12 +76,23 @@ def run(episodes,
             done = terminated or truncated
 
         score_history.append(score)
+        species_richness_history.append(
+            env.bio_env.get_average_species_richness())
+        species_evenness_history.append(
+            env.bio_env.get_average_species_evenness())
 
-        if show_species_history:
-            env.show_species_history()
+        if show_episode_history:
+            env.show_episode_history()
+
     print("Average episode score: " +
           str(sum(score_history) / len(score_history)))
-    env.show_score_history(score_history)
+    print("Average episode species richness: " +
+          str(sum(species_richness_history) / len(species_richness_history)))
+    print("Average episode species evenness: " +
+          str(sum(species_evenness_history) / len(species_evenness_history)))
+
+    env.show_run_history(score_history, species_richness_history,
+                         species_evenness_history)
     env.close()
 
 
@@ -88,6 +100,6 @@ if __name__ == '__main__':
     # train_model()
     run(episodes=10,
         render_mode="off",
-        show_species_history=False,
+        show_episode_history=False,
         agent_name="model",
-        model_name="trained_models/PPO_150k_au_4x4")
+        model_name="PPO_100k")

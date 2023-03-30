@@ -113,19 +113,22 @@ class BioGymWorld(gym.Env):
         obs = self.bio_env.get_render_obs()
         return self.renderer.render(obs)
 
-    def show_species_history(self):
+    def show_episode_history(self):
         """
-        Show the species population history
+        Show the history for this episode
         """
-        pop_history = self.bio_env.get_pop_history()
+        history = self.bio_env.get_history()
         critical_thresholds = self.bio_env.get_critical_thresholds()
-        self.renderer.render_pop_history(pop_history, critical_thresholds)
+        self.renderer.render_episode_history(history, critical_thresholds)
 
-    def show_score_history(self, score_history):
+    def show_run_history(self, score_history, species_richness_history,
+                         species_evenness_history):
         """
-        Show the score history
+        Show the history for this run (over all episodes)
         """
-        self.renderer.render_score_history(score_history)
+        self.renderer.render_run_history(score_history,
+                                         species_richness_history,
+                                         species_evenness_history)
 
     def close(self):
         self.renderer.close()

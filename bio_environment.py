@@ -30,14 +30,18 @@ class BioEnvironment():
         self.params = np.array(
             [r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma])
 
-        # List of the populations at different time steps
-        self.pop_history = [[] for _ in range(self.num_species)]
+        # Dictionary containing different value histories
+        self.history = {}
+        self.history["pop_history"] = [
+            [] for _ in range(self.num_species)
+        ]  # List of the populations at different time steps
+        self.history["species_richness"] = [
+        ]  # List of the species richness relative to the critical thresholds at different time steps
+        self.history["species_evenness"] = [
+        ]  # List of the species evenness at different time steps
 
         # Initialize species populations
         self.species_populations = self.init_species_populations()
-
-        # Record populations
-        self.record_population()
 
         # Set the extinction thresholds
         self.extinction_threshold = [k * 0.05, d, d_2 * 0.025]
@@ -54,6 +58,9 @@ class BioEnvironment():
         self.prev_criticalness = None
 
         self.action_unit = None
+
+        # Record history
+        self.record_history()
 
     def init_species_populations(self):
         """
@@ -339,17 +346,42 @@ class BioEnvironment():
         # Simulating dispersal for the whole grid
         self.sim_dispersal()
 
-        # Record population
-        self.record_population()
+        # Record history
+        self.record_history()
 
     def reset(self):
         """
         Reseting environment
         """
-        self.pop_history = [[] for _ in range(self.num_species)]
+        self.history["pop_history"] = [[] for _ in range(self.num_species)]
+        self.history["species_richness"] = []
+        self.history["species_evenness"] = []
         self.species_populations = self.init_species_populations()
         self.action_unit = None
         self.prev_criticalness = None
+
+    def get_species_richness(self):
+        """
+            Get the current species richness, which is defined as the product of the criticalness of all the different species
+            """
+        return np.prod(self.get_criticalness())
+
+    def get_species_evenness(self):
+        """
+        Calculates species evenness (how close species abundances are) based on the Shannon diversity index
+        """
+        shannon_index = 0
+        N = self.species_populations.sum()
+        for species_num in range(self.num_species):
+
+            # If a species is extinct, the evenness is 0
+            if self.species_populations[species_num].sum() == 0:
+                return 0
+
+            p = self.species_populations[species_num].sum() / N
+            shannon_index += np.log(p**p)
+        shannon_index *= -1
+        return shannon_index / np.log(self.num_species)
 
     def clear_action_unit(self):
         """
@@ -357,13 +389,16 @@ class BioEnvironment():
         """
         self.action_unit = None
 
-    def record_population(self):
+    def record_history(self):
         """
-        Saves the current total for each species
+        Saves the current metrics in history
         """
         for species_num in range(self.num_species):
-            self.pop_history[species_num].append(
+            self.history["pop_history"][species_num].append(
                 self.species_populations[species_num].sum())
+
+        self.history["species_richness"].append(self.get_species_richness())
+        self.history["species_evenness"].append(self.get_species_evenness())
 
     def get_obs(self):
         """
@@ -438,11 +473,11 @@ class BioEnvironment():
             return ((self.grid_size - self.action_unit_size + 1)**
                     2) * self.num_species
 
-    def get_pop_history(self):
+    def get_history(self):
         """
-        Returns the total population for each species over time
+        Returns the history of different metrics
         """
-        return self.pop_history
+        return self.history
 
     def get_critical_thresholds(self):
         """
@@ -492,6 +527,20 @@ class BioEnvironment():
             criticalness.append((self.species_populations[species_num].sum() /
                                  self.critical_thresholds[species_num]))
         return np.array(criticalness)
+
+    def get_average_species_richness(self):
+        """
+        Getting the average species richness since the env has been reset
+        """
+        return sum(self.history["species_richness"]) / len(
+            self.history["species_richness"])
+
+    def get_average_species_evenness(self):
+        """
+        Getting the average species evenness since the env has been reset
+        """
+        return sum(self.history["species_evenness"]) / len(
+            self.history["species_evenness"])
 
     def get_prev_criticalness(self):
         if self.prev_criticalness is None:
@@ -595,19 +644,18 @@ def main():
                        s=0.4,
                        gamma=0.1)
     b.species_populations = np.array(
-        [[[100, 50, 60, 70, 180, 90], [30, 40, 50, 60, 70, 80],
-          [90, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110],
-          [120, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110]],
-         [[300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300],
-          [300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300],
-          [300, 300, 300, 300, 300, 300], [300, 300, 300, 300, 300, 300]],
-         [[100, 50, 60, 70, 80, 90], [30, 40, 50, 60, 70, 80],
-          [90, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110],
-          [120, 10, 20, 30, 40, 50], [60, 70, 80, 90, 100, 110]]],
+        [[[10, 10, 10, 10, 10, 10], [10, 10, 10, 10, 10, 10],
+          [10, 10, 10, 10, 10, 10], [10, 10, 10, 10, 10, 10],
+          [10, 10, 10, 10, 10, 10], [10, 10, 10, 10, 10, 10]],
+         [[30, 30, 30, 30, 30, 30], [30, 30, 30, 30, 30, 30],
+          [30, 30, 30, 30, 30, 30], [30, 30, 30, 30, 30, 30],
+          [30, 30, 30, 30, 30, 30], [30, 30, 30, 30, 30, 30]],
+         [[60, 60, 60, 60, 60, 60], [60, 60, 60, 60, 60, 60],
+          [60, 60, 60, 60, 60, 60], [60, 60, 60, 60, 60, 60],
+          [60, 60, 60, 60, 60, 60], [60, 60, 60, 60, 60, 60]]],
         dtype=np.float64)
     print(b.species_populations)
-    print(b.scale_species_populations())
-    print(b.action_unit_obs(b.scale_species_populations()))
+    print(b.get_species_evenness())
 
 
 if __name__ == '__main__':

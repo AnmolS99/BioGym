@@ -126,22 +126,29 @@ class SNS_Renderer():
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def render_pop_history(self, pop_history, critical_thresholds):
+    def render_episode_history(self, history, critical_thresholds):
         """
-        Render species population history
+        Render history of different metrics
         """
 
         # Close window displaying heatmaps
         plt.close()
 
-        fig, ax = plt.subplots(self.num_species, 1)
+        fig, ax = plt.subplots(self.num_species + len(history) - 1, 1)
 
         for species_num in range(self.num_species):
-            ax[species_num].plot(pop_history[species_num])
+            ax[species_num].plot(history["pop_history"][species_num])
             ax[species_num].set_title(str(self.species_names[species_num]))
             ax[species_num].axhline(critical_thresholds[species_num],
                                     linestyle='--',
                                     color="red")
+
+        ax[3].plot(history["species_richness"])
+        ax[3].set_title("Species richness")
+        ax[3].axhline(1, linestyle='--', color="red")
+
+        ax[4].plot(history["species_evenness"])
+        ax[4].set_title("Species evenness")
 
         fig.supylabel('Population')
         fig.supxlabel('Time step')
@@ -151,17 +158,28 @@ class SNS_Renderer():
         plt.show(block=True)
         self.reset()
 
-    def render_score_history(self, score_history):
+    def render_run_history(self, score_history, species_richness_history,
+                           species_evenness_history):
         """
         Render species population history
         """
         # Close window displaying heatmaps
         plt.close()
 
-        plt.plot(score_history)
+        fig, ax = plt.subplots(3, 1)
 
-        plt.ylabel('Score (Total reward)')
-        plt.xlabel('Episode')
+        ax[0].plot(score_history)
+        ax[0].set_title("Score (Total reward)")
+
+        ax[1].plot(species_richness_history)
+        ax[1].set_title("Species richness")
+
+        ax[2].plot(species_evenness_history)
+        ax[2].set_title("Species evenness")
+
+        fig.supxlabel('Episode')
+
+        fig.tight_layout()
 
         plt.show(block=True)
         self.reset()
