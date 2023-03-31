@@ -121,13 +121,13 @@ class BioGymWorld(gym.Env):
         critical_thresholds = self.bio_env.get_critical_thresholds()
         self.renderer.render_episode_history(history, critical_thresholds)
 
-    def show_run_history(self, score_history, species_richness_history,
+    def show_run_history(self, score_history, species_abundance_history,
                          species_evenness_history):
         """
         Show the history for this run (over all episodes)
         """
         self.renderer.render_run_history(score_history,
-                                         species_richness_history,
+                                         species_abundance_history,
                                          species_evenness_history)
 
     def close(self):

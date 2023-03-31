@@ -46,7 +46,7 @@ def run(episodes,
     Run episodes of environment with given RL agent.
     """
     score_history = []
-    species_richness_history = []
+    species_abundance_history = []
     species_evenness_history = []
 
     env.renderer.render_mode = render_mode
@@ -76,8 +76,8 @@ def run(episodes,
             done = terminated or truncated
 
         score_history.append(score)
-        species_richness_history.append(
-            env.bio_env.get_average_species_richness())
+        species_abundance_history.append(
+            env.bio_env.get_average_species_abundance())
         species_evenness_history.append(
             env.bio_env.get_average_species_evenness())
 
@@ -86,12 +86,13 @@ def run(episodes,
 
     print("Average episode score: " +
           str(sum(score_history) / len(score_history)))
-    print("Average episode species richness: " +
-          str(sum(species_richness_history) / len(species_richness_history)))
+    print(
+        "Average episode species abundance (relative to critical threshold): "
+        + str(sum(species_abundance_history) / len(species_abundance_history)))
     print("Average episode species evenness: " +
           str(sum(species_evenness_history) / len(species_evenness_history)))
 
-    env.show_run_history(score_history, species_richness_history,
+    env.show_run_history(score_history, species_abundance_history,
                          species_evenness_history)
     env.close()
 
@@ -101,5 +102,5 @@ if __name__ == '__main__':
     run(episodes=10,
         render_mode="off",
         show_episode_history=False,
-        agent_name="model",
+        agent_name="no action",
         model_name="PPO_100k")

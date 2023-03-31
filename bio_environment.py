@@ -35,8 +35,8 @@ class BioEnvironment():
         self.history["pop_history"] = [
             [] for _ in range(self.num_species)
         ]  # List of the populations at different time steps
-        self.history["species_richness"] = [
-        ]  # List of the species richness relative to the critical thresholds at different time steps
+        self.history["species_abundance"] = [
+        ]  # List of the species abundance relative to the critical thresholds at different time steps
         self.history["species_evenness"] = [
         ]  # List of the species evenness at different time steps
 
@@ -354,17 +354,17 @@ class BioEnvironment():
         Reseting environment
         """
         self.history["pop_history"] = [[] for _ in range(self.num_species)]
-        self.history["species_richness"] = []
+        self.history["species_abundance"] = []
         self.history["species_evenness"] = []
         self.species_populations = self.init_species_populations()
         self.action_unit = None
         self.prev_criticalness = None
 
-    def get_species_richness(self):
+    def get_species_abundance(self):
         """
-            Get the current species richness, which is defined as the product of the criticalness of all the different species
+            Get the current species abundance, which is defined as the average criticalness of all the different species
             """
-        return np.prod(self.get_criticalness())
+        return self.get_criticalness().sum() / self.num_species
 
     def get_species_evenness(self):
         """
@@ -397,7 +397,7 @@ class BioEnvironment():
             self.history["pop_history"][species_num].append(
                 self.species_populations[species_num].sum())
 
-        self.history["species_richness"].append(self.get_species_richness())
+        self.history["species_abundance"].append(self.get_species_abundance())
         self.history["species_evenness"].append(self.get_species_evenness())
 
     def get_obs(self):
@@ -528,12 +528,12 @@ class BioEnvironment():
                                  self.critical_thresholds[species_num]))
         return np.array(criticalness)
 
-    def get_average_species_richness(self):
+    def get_average_species_abundance(self):
         """
-        Getting the average species richness since the env has been reset
+        Getting the average species abundance since the env has been reset
         """
-        return sum(self.history["species_richness"]) / len(
-            self.history["species_richness"])
+        return sum(self.history["species_abundance"]) / len(
+            self.history["species_abundance"])
 
     def get_average_species_evenness(self):
         """
