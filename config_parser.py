@@ -23,6 +23,7 @@ class ConfigParser:
                             grid_size, action_unit_size, display_population)
 
     def create_bio_environment(self, num_species, grid_size, action_unit_size,
+                               action_multiplier,
                                reduced_actions) -> BioEnvironment:
         diagonal_neighbours = self.config["BioEnvironment"].getboolean(
             "diagonal_neighbours")
@@ -45,20 +46,23 @@ class ConfigParser:
         gamma = self.config["BioEnvironment"].getfloat("gamma")
 
         return BioEnvironment(num_species, grid_size, action_unit_size,
-                              diagonal_neighbours, reduced_actions,
-                              migration_rate, species_ranges, r, k, a, b, e, d,
-                              a_2, b_2, e_2, d_2, s, gamma)
+                              action_multiplier, diagonal_neighbours,
+                              reduced_actions, migration_rate, species_ranges,
+                              r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma)
 
     def create_bio_gym_world(self) -> BioGymWorld:
         num_species = int(self.config["BioGymWorld"]["num_species"])
         grid_size = int(self.config["BioGymWorld"]["grid_size"])
         action_unit_size = int(self.config["BioGymWorld"]["action_unit_size"])
+        action_multiplier = int(
+            self.config["BioGymWorld"]["action_multiplier"])
         max_steps = int(self.config["BioGymWorld"]["max_steps"])
         reduced_actions = self.config["BioGymWorld"].getboolean(
             "reduced_actions")
 
         bio_env = self.create_bio_environment(num_species, grid_size,
                                               action_unit_size,
+                                              action_multiplier,
                                               reduced_actions)
         renderer = self.create_renderer(num_species, grid_size,
                                         action_unit_size)

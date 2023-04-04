@@ -9,12 +9,14 @@ class BioEnvironment():
     """
 
     def __init__(self, num_species, grid_size, action_unit_size,
-                 diagonal_neighbours, reduced_actions, migration_rate,
-                 species_ranges, r, k, a, b, e, d, a_2, b_2, e_2, d_2, s,
-                 gamma) -> None:
+                 action_multiplier, diagonal_neighbours, reduced_actions,
+                 migration_rate, species_ranges, r, k, a, b, e, d, a_2, b_2,
+                 e_2, d_2, s, gamma) -> None:
         self.num_species = num_species
         self.grid_size = grid_size
         self.action_unit_size = action_unit_size
+
+        self.action_multiplier = action_multiplier  # The multiplier used when adding population
 
         self.diagonal_neighbours = diagonal_neighbours
 
@@ -141,7 +143,7 @@ class BioEnvironment():
         Add population to the specifiec action unit.
         """
         # NOTE: Since x follows to the x-axis, hence it refers to columns, y refers to rows, therefore the indexing of the matrix is counter-intuitive
-        addition = self.extinction_threshold[species] * 10
+        addition = self.extinction_threshold[species] * self.action_multiplier
         self.species_populations[species, y:y + self.action_unit_size,
                                  x:x + self.action_unit_size] += addition
         return addition

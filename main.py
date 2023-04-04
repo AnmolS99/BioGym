@@ -7,7 +7,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/default5.ini")
+config_parser = ConfigParser("bio_env_configs/default.ini")
 env = config_parser.create_bio_gym_world()
 
 model_type = PPO
@@ -100,7 +100,7 @@ def run(episodes,
 if __name__ == '__main__':
     # train_model()
     run(episodes=10,
-        render_mode="off",
+        render_mode="on",
         show_episode_history=False,
-        agent_name="no action",
+        agent_name="model",
         model_name="PPO_100k")
