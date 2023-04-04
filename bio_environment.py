@@ -553,6 +553,21 @@ class BioEnvironment():
     def get_criticalness_trend(self):
         return self.get_criticalness() - self.get_prev_criticalness()
 
+    def get_add_population_cost(self):
+        """
+        Get the cost of adding population in an action unit
+        """
+        return -(((self.action_unit_size**2) * self.action_multiplier) / 200)
+
+    def get_harvest_population_reward(self):
+        """
+        Get the reward of harvesting a population in an action unit
+        """
+        species, _, harvesting, population = self.action_unit
+        multiplier = population / (self.action_unit_size**2 *
+                                   self.extinction_threshold[species])
+        return -(((self.action_unit_size**2) * multiplier) / 200)
+
     def is_action_unit_placed(self):
         return self.action_unit is not None
 

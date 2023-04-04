@@ -45,6 +45,9 @@ class BioGymWorld(gym.Env):
         # Creating the action space
         self.action_space = spaces.Discrete(self.bio_env.get_action_space())
 
+        # Calculating cost of placing an action unit (adding populations)
+        self.pop_add_cost = self.bio_env.get_add_population_cost()
+
     def _get_obs(self):
         return self.bio_env.get_obs()
 
@@ -95,18 +98,19 @@ class BioGymWorld(gym.Env):
             return -1000
         else:
             reward = 0
-            # Negative reward for each species below critical threshold
             if self.bio_env.is_action_unit_placed():
                 _, _, harvesting, _ = self.bio_env.get_action_unit()
                 if harvesting:
-                    reward += -0.25
+                    # Positive cost for harvesting population
+                    reward += self.bio_env.get_harvest_population_reward()
+                    # reward += 0
                 else:
-                    reward += -0.25
+                    # Negative cost for adding population
+                    reward += self.pop_add_cost
             if self.bio_env.get_num_species_critical() > 0:
                 reward += -1
             else:
                 reward += 1
-            # Negative cost for placing action unit
         return reward
 
     def render(self):

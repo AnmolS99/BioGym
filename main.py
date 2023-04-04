@@ -11,19 +11,18 @@ config_parser = ConfigParser("bio_env_configs/default.ini")
 env = config_parser.create_bio_gym_world()
 
 model_type = PPO
-model_log_name = "PPO_100k"
 
 
-def train_model():
+def train_model(model_name):
     env.renderer.render_mode = "off"
     model = model_type("MultiInputPolicy",
                        env,
                        verbose=1,
                        tensorboard_log="./logs/")
-    model.learn(total_timesteps=100_000,
+    model.learn(total_timesteps=200_000,
                 progress_bar=True,
-                tb_log_name=model_log_name)
-    model.save("trained_models/" + model_log_name)
+                tb_log_name=model_name)
+    model.save("trained_models/" + model_name)
 
 
 def get_agent(name):
@@ -52,10 +51,7 @@ def run(episodes,
     env.renderer.render_mode = render_mode
 
     if agent_name == "model":
-        if model_name is not None:
-            agent = model_type.load("trained_models/" + model_name)
-        else:
-            agent = model_type.load("trained_models/" + model_log_name)
+        agent = model_type.load("trained_models/" + model_name)
     else:
         agent = get_agent(agent_name)
 
@@ -98,9 +94,11 @@ def run(episodes,
 
 
 if __name__ == '__main__':
-    # train_model()
-    run(episodes=10,
+    model_name = "PPO_200k_harvest_rew"
+
+    # train_model(model_name)
+    run(episodes=2,
         render_mode="on",
         show_episode_history=False,
         agent_name="model",
-        model_name="PPO_100k")
+        model_name=model_name)
