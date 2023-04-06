@@ -10,7 +10,7 @@ np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 config_parser = ConfigParser("bio_env_configs/2x2_10x.ini")
 env = config_parser.create_bio_gym_world()
 
-model_type = DQN
+model_type = PPO
 
 
 def train_model(model_name, timesteps):
@@ -94,13 +94,13 @@ def run(episodes,
 
 
 if __name__ == '__main__':
-    for i in range(1, 11):
+    for i in range(1, 21):
 
-        model_name = "DQN_2x2_10x_200k_" + str(i)
+        model_name = "PPO_2x2_10x_200k_" + str(i)
         train_model(model_name, 200_000)
 
     # run(episodes=2,
     #     render_mode="on",
-    #     show_episode_history=False,
+    #     show_episode_history=True,
     #     agent_name="model",
-    #     model_name=model_name)
+    #     model_name="DQN/2x2_10x/DQN_2x2_10x_200k_4")
