@@ -50,7 +50,7 @@ class ConfigParser:
                               reduced_actions, migration_rate, species_ranges,
                               r, k, a, b, e, d, a_2, b_2, e_2, d_2, s, gamma)
 
-    def create_bio_gym_world(self) -> BioGymWorld:
+    def create_bio_gym_world(self):
         num_species = int(self.config["BioGymWorld"]["num_species"])
         grid_size = int(self.config["BioGymWorld"]["grid_size"])
         action_unit_size = int(self.config["BioGymWorld"]["action_unit_size"])
@@ -67,4 +67,4 @@ class ConfigParser:
         renderer = self.create_renderer(num_species, grid_size,
                                         action_unit_size)
 
-        return BioGymWorld(bio_env, renderer, max_steps, reduced_actions)
+        return bio_env, renderer, max_steps, reduced_actions
