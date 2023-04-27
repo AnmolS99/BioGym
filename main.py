@@ -11,7 +11,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/2x2_10x.ini")
+config_parser = ConfigParser("bio_env_configs/3x3_10x.ini")
 bio_env, renderer, max_steps, reduced_actions = config_parser.create_bio_gym_world(
 )
 
@@ -149,7 +149,7 @@ def run(episodes,
 if __name__ == '__main__':
     for i in range(1, 21):
 
-        model_name = "8env_A2C_2x2_10x_200k_" + str(i)
+        model_name = "8env_A2C_3x3_10x_200k_" + str(i)
         train_model(model_name, 200_000)
 
     # run(episodes=2,
