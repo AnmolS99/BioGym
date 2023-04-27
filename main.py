@@ -1,22 +1,70 @@
 from config_parser import ConfigParser
 from stable_baselines3 import DQN, A2C, PPO
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecMonitor
+from stable_baselines3.common.utils import set_random_seed
 import numpy as np
+from bio_world import BioGymWorld
 from agents.no_action import NoAction
 from agents.random_action import RandomAction
 from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/4x4_10x.ini")
-env = config_parser.create_bio_gym_world()
+config_parser = ConfigParser("bio_env_configs/3x3_10x.ini")
+bio_env, renderer, max_steps, reduced_actions = config_parser.create_bio_gym_world(
+)
 
-model_type = PPO
+env = BioGymWorld(bio_env, renderer, max_steps, reduced_actions)
+
+
+def make_env(rank, seed=0):
+    """
+    Utility function for multiprocessed env.
+
+    :param env_id: (str) the environment ID
+    :param seed: (int) the inital seed for RNG
+    :param rank: (int) index of the subprocess
+    """
+
+    def _init():
+        env_instance = BioGymWorld(bio_env, renderer, max_steps,
+                                   reduced_actions)
+        env_instance.renderer.render_mode = "off"
+        # use a seed for reproducibility
+        # Important: use a different seed for each environment
+        # otherwise they would generate the same experiences
+        # env_instance.reset(seed=seed + rank)
+        env_instance.reset()
+        return env_instance
+
+    # set_random_seed(seed)
+    return _init
+
+
+# vec_env = make_vec_env(BioGymWorld,
+#                        n_envs=8,
+#                        vec_env_cls=DummyVecEnv,
+#                        env_kwargs=dict(bio_env=bio_env,
+#                                        renderer=renderer,
+#                                        max_steps=max_steps,
+#                                        reduced_actions=reduced_actions))
+
+train_env = SubprocVecEnv(
+    [make_env(i) for i in range(8)],
+    start_method="fork",
+)
+
+train_env = VecMonitor(train_env)
+
+print("n_envs = " + str(train_env.num_envs))
+
+model_type = A2C
 
 
 def train_model(model_name, timesteps):
-    env.renderer.render_mode = "off"
     model = model_type("MultiInputPolicy",
-                       env,
+                       train_env,
                        verbose=1,
                        tensorboard_log="./logs/")
     model.learn(total_timesteps=timesteps,
@@ -94,13 +142,13 @@ def run(episodes,
 
 
 if __name__ == '__main__':
-    for i in range(1, 21):
+    for i in range(1, 2):
 
-        model_name = "PPO_4x4_10x_200k_" + str(i)
+        model_name = "16env_subproc_A2C_3x3_10x_200k_" + str(i)
         train_model(model_name, 200_000)
 
     # run(episodes=2,
     #     render_mode="on",
     #     show_episode_history=True,
     #     agent_name="model",
-    #     model_name="DQN/2x2_10x/DQN_2x2_10x_200k_4")
+    #     model_name="8env_subproc_A2C_3x3_10x_200k_1")
