@@ -11,7 +11,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/4x4_10x.ini")
+config_parser = ConfigParser("bio_env_configs/3x3_10x.ini")
 bio_env, renderer, max_steps, reduced_actions = config_parser.create_bio_gym_world(
 )
 
@@ -42,15 +42,6 @@ def make_env(rank, seed=0):
     return _init
 
 
-# vec_env = make_vec_env(BioGymWorld,
-#                        n_envs=8,
-#                        vec_env_cls=DummyVecEnv,
-#                        env_kwargs=dict(bio_env=bio_env,
-#                                        renderer=renderer,
-#                                        max_steps=max_steps,
-#                                        reduced_actions=reduced_actions))
-
-
 def make_train_env():
 
     train_env = SubprocVecEnv(
@@ -62,16 +53,20 @@ def make_train_env():
     return train_env
 
 
-model_type = PPO
+model_type = A2C
 
 
 def train_model(model_name, timesteps):
     train_env = make_train_env()
     print("train_env.n_envs = " + str(train_env.num_envs))
+    # train_env = env
     model = model_type("MultiInputPolicy",
                        train_env,
                        verbose=1,
                        tensorboard_log="./logs/")
+
+    print(model.policy)
+
     model.learn(total_timesteps=timesteps,
                 progress_bar=True,
                 tb_log_name=model_name)
@@ -99,7 +94,7 @@ def run(episodes,
     """
     score_history = []
     species_abundance_history = []
-    species_evenness_history = []
+    shannon_index_history = []
 
     env.renderer.render_mode = render_mode
 
@@ -127,8 +122,7 @@ def run(episodes,
         score_history.append(score)
         species_abundance_history.append(
             env.bio_env.get_average_species_abundance())
-        species_evenness_history.append(
-            env.bio_env.get_average_species_evenness())
+        shannon_index_history.append(env.bio_env.get_average_shannon_index())
 
         if show_episode_history:
             env.show_episode_history()
@@ -138,22 +132,22 @@ def run(episodes,
     print(
         "Average episode species abundance (relative to critical threshold): "
         + str(sum(species_abundance_history) / len(species_abundance_history)))
-    print("Average episode species evenness: " +
-          str(sum(species_evenness_history) / len(species_evenness_history)))
+    print("Average episode Shannon index: " +
+          str(sum(shannon_index_history) / len(shannon_index_history)))
 
     env.show_run_history(score_history, species_abundance_history,
-                         species_evenness_history)
+                         shannon_index_history)
     env.close()
 
 
 if __name__ == '__main__':
-    for i in range(1, 21):
+    # for i in range(1, 21):
 
-        model_name = "8env_PPO_4x4_10x_200k_" + str(i)
-        train_model(model_name, 200_000)
+    #     model_name = "8env_PPO_4x4_10x_200k_" + str(i)
+    #     train_model(model_name, 200_000)
 
-    # run(episodes=2,
-    #     render_mode="on",
-    #     show_episode_history=True,
-    #     agent_name="model",
-    #     model_name="8env_subproc_A2C_3x3_10x_200k_1")
+    run(episodes=2,
+        render_mode="on",
+        show_episode_history=True,
+        agent_name="model",
+        model_name="PPO/1env/3x3_10x/PPO_3x3_10x_200k_20")

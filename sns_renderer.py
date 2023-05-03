@@ -147,8 +147,8 @@ class SNS_Renderer():
         ax[3].set_title("Species abundance (relative to critical thresholds)")
         ax[3].axhline(1, linestyle='--', color="red")
 
-        ax[4].plot(history["species_evenness"])
-        ax[4].set_title("Species evenness")
+        ax[4].plot(history["shannon_index"])
+        ax[4].set_title("Shannon index")
 
         fig.supylabel('Population')
         fig.supxlabel('Time step')
@@ -159,7 +159,7 @@ class SNS_Renderer():
         self.reset()
 
     def render_run_history(self, score_history, species_abundance_history,
-                           species_evenness_history):
+                           shannon_index_history):
         """
         Render species population history
         """
@@ -174,8 +174,8 @@ class SNS_Renderer():
         ax[1].plot(species_abundance_history)
         ax[1].set_title("Species abundance (relative to critical thresholds)")
 
-        ax[2].plot(species_evenness_history)
-        ax[2].set_title("Species evenness")
+        ax[2].plot(shannon_index_history)
+        ax[2].set_title("Shannon Index")
 
         fig.supxlabel('Episode')
 

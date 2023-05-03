@@ -39,8 +39,8 @@ class BioEnvironment():
         ]  # List of the populations at different time steps
         self.history["species_abundance"] = [
         ]  # List of the species abundance relative to the critical thresholds at different time steps
-        self.history["species_evenness"] = [
-        ]  # List of the species evenness at different time steps
+        self.history["shannon_index"] = [
+        ]  # List of the Shannon index at different time steps
 
         # Initialize species populations
         self.species_populations = self.init_species_populations()
@@ -357,7 +357,7 @@ class BioEnvironment():
         """
         self.history["pop_history"] = [[] for _ in range(self.num_species)]
         self.history["species_abundance"] = []
-        self.history["species_evenness"] = []
+        self.history["shannon_index"] = []
         self.species_populations = self.init_species_populations()
         self.action_unit = None
         self.prev_criticalness = None
@@ -368,15 +368,15 @@ class BioEnvironment():
             """
         return self.get_criticalness().sum() / self.num_species
 
-    def get_species_evenness(self):
+    def get_shannon_index(self):
         """
-        Calculates species evenness (how close species abundances are) based on the Shannon diversity index
+        Calculates Shannon index (how close species abundances are) based on the Shannon diversity index
         """
         shannon_index = 0
         N = self.species_populations.sum()
         for species_num in range(self.num_species):
 
-            # If a species is extinct, the evenness is 0
+            # If a species is extinct, the Shannon index is 0
             if self.species_populations[species_num].sum() == 0:
                 return 0
 
@@ -400,7 +400,7 @@ class BioEnvironment():
                 self.species_populations[species_num].sum())
 
         self.history["species_abundance"].append(self.get_species_abundance())
-        self.history["species_evenness"].append(self.get_species_evenness())
+        self.history["shannon_index"].append(self.get_shannon_index())
 
     def get_obs(self):
         """
@@ -537,12 +537,12 @@ class BioEnvironment():
         return sum(self.history["species_abundance"]) / len(
             self.history["species_abundance"])
 
-    def get_average_species_evenness(self):
+    def get_average_shannon_index(self):
         """
-        Getting the average species evenness since the env has been reset
+        Getting the average Shannon index since the env has been reset
         """
-        return sum(self.history["species_evenness"]) / len(
-            self.history["species_evenness"])
+        return sum(self.history["shannon_index"]) / len(
+            self.history["shannon_index"])
 
     def get_prev_criticalness(self):
         if self.prev_criticalness is None:
@@ -672,7 +672,7 @@ def main():
           [60, 60, 60, 60, 60, 60], [60, 60, 60, 60, 60, 60]]],
         dtype=np.float64)
     print(b.species_populations)
-    print(b.get_species_evenness())
+    print(b.get_shannon_index())
 
 
 if __name__ == '__main__':

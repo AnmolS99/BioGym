@@ -126,13 +126,13 @@ class BioGymWorld(gym.Env):
         self.renderer.render_episode_history(history, critical_thresholds)
 
     def show_run_history(self, score_history, species_abundance_history,
-                         species_evenness_history):
+                         shannon_index_history):
         """
         Show the history for this run (over all episodes)
         """
         self.renderer.render_run_history(score_history,
                                          species_abundance_history,
-                                         species_evenness_history)
+                                         shannon_index_history)
 
     def close(self):
         self.renderer.close()
