@@ -53,7 +53,7 @@ def make_train_env():
     return train_env
 
 
-model_type = A2C
+model_type = PPO
 
 
 def train_model(model_name, timesteps):
@@ -141,13 +141,13 @@ def run(episodes,
 
 
 if __name__ == '__main__':
-    # for i in range(1, 21):
+    for i in range(1, 21):
 
-    #     model_name = "8env_PPO_4x4_10x_200k_" + str(i)
-    #     train_model(model_name, 200_000)
+        model_name = "8env_A2C_4x4_10x_200k_" + str(i)
+        train_model(model_name, 200_000)
 
-    run(episodes=2,
-        render_mode="on",
-        show_episode_history=True,
-        agent_name="model",
-        model_name="PPO/1env/3x3_10x/PPO_3x3_10x_200k_20")
+    # run(episodes=2,
+    #     render_mode="on",
+    #     show_episode_history=True,
+    #     agent_name="model",
+    #     model_name="PPO/1env/3x3_10x/PPO_3x3_10x_200k_20")
