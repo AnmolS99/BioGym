@@ -11,7 +11,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/3x3_10x.ini")
+config_parser = ConfigParser("bio_env_configs/4x4_10x.ini")
 bio_env, renderer, max_steps, reduced_actions = config_parser.create_bio_gym_world(
 )
 
@@ -53,19 +53,18 @@ def make_train_env():
     return train_env
 
 
-model_type = PPO
+model_type = DQN
 
 
 def train_model(model_name, timesteps):
-    train_env = make_train_env()
-    print("train_env.n_envs = " + str(train_env.num_envs))
-    # train_env = env
+    # train_env = make_train_env()
+    # print("train_env.n_envs = " + str(train_env.num_envs))
+    train_env = env
+    train_env.renderer.render_mode = "off"
     model = model_type("MultiInputPolicy",
                        train_env,
                        verbose=1,
                        tensorboard_log="./logs/")
-
-    print(model.policy)
 
     model.learn(total_timesteps=timesteps,
                 progress_bar=True,
@@ -143,7 +142,7 @@ def run(episodes,
 if __name__ == '__main__':
     for i in range(1, 21):
 
-        model_name = "8env_A2C_4x4_10x_200k_" + str(i)
+        model_name = "new_DQN_4x4_10x_200k_" + str(i)
         train_model(model_name, 200_000)
 
     # run(episodes=2,
