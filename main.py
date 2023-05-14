@@ -11,7 +11,7 @@ from agents.user_action import UserAction
 
 np.set_printoptions(suppress=True, formatter={'float': "{0:0.3f}".format})
 
-config_parser = ConfigParser("bio_env_configs/2x2_15x.ini")
+config_parser = ConfigParser("bio_env_configs/2x2_5x.ini")
 bio_env, renderer, max_steps, reduced_actions = config_parser.create_bio_gym_world(
 )
 
@@ -53,14 +53,14 @@ def make_train_env():
     return train_env
 
 
-model_type = DQN
+model_type = A2C
 
 
 def train_model(model_name, timesteps):
-    # train_env = make_train_env()
-    # print("train_env.n_envs = " + str(train_env.num_envs))
-    train_env = env
-    train_env.renderer.render_mode = "off"
+    train_env = make_train_env()
+    print("train_env.n_envs = " + str(train_env.num_envs))
+    # train_env = env
+    # train_env.renderer.render_mode = "off"
     model = model_type("MultiInputPolicy",
                        train_env,
                        verbose=1,
@@ -142,7 +142,7 @@ def run(episodes,
 if __name__ == '__main__':
     for i in range(1, 21):
 
-        model_name = "DQN_2x2_15x_200k_" + str(i)
+        model_name = "8env_A2C_2x2_5x_200k_" + str(i)
         train_model(model_name, 200_000)
 
     # run(episodes=2,
