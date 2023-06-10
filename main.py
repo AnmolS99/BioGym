@@ -53,7 +53,7 @@ def make_train_env():
     return train_env
 
 
-model_type = PPO
+model_type = DQN
 
 
 def train_model(model_name, timesteps):
@@ -94,6 +94,9 @@ def run(episodes,
     score_history = []
     species_abundance_history = []
     shannon_index_history = []
+    num_add_pop_actions = 0
+    num_remove_pop_actions = 0
+    num_no_actions = 0
 
     env.renderer.render_mode = render_mode
 
@@ -114,6 +117,13 @@ def run(episodes,
             else:
                 action = agent.predict(obs, env.current_step)
 
+            if action < env.bio_env.get_no_action():
+                num_remove_pop_actions += 1
+            elif action > env.bio_env.get_no_action():
+                num_add_pop_actions += 1
+            else:
+                num_no_actions += 1
+
             obs, reward, terminated, truncated, info = env.step(action)
             score += reward
             done = terminated or truncated
@@ -130,9 +140,21 @@ def run(episodes,
           str(sum(score_history) / len(score_history)))
     print(
         "Average episode species abundance (relative to critical threshold): "
-        + str(sum(species_abundance_history) / len(species_abundance_history)))
+        +
+        str(sum(species_abundance_history) / len(species_abundance_history)) +
+        ", std = " + str(np.std(np.array(species_abundance_history))))
     print("Average episode Shannon index: " +
-          str(sum(shannon_index_history) / len(shannon_index_history)))
+          str(sum(shannon_index_history) / len(shannon_index_history)) +
+          ", std = " + str(np.std(np.array(shannon_index_history))))
+
+    print("----------------------------------")
+    sum_actions = num_add_pop_actions + num_remove_pop_actions + num_no_actions
+    print("Num. add actions = " + str(num_add_pop_actions) + " (" +
+          str(num_add_pop_actions * 100 / sum_actions) + "%)")
+    print("Num. remove actions = " + str(num_remove_pop_actions) + " (" +
+          str(num_remove_pop_actions * 100 / sum_actions) + "%)")
+    print("Num. no actions = " + str(num_no_actions) + " (" +
+          str(num_no_actions * 100 / sum_actions) + "%)")
 
     env.show_run_history(score_history, species_abundance_history,
                          shannon_index_history)
@@ -140,13 +162,13 @@ def run(episodes,
 
 
 if __name__ == '__main__':
-    for i in range(1, 21):
+    # for i in range(1, 21):
 
-        model_name = "8env_PPO_2x2_10x_800k_" + str(i)
-        train_model(model_name, 800_000)
+    #     model_name = "8env_PPO_2x2_10x_800k_" + str(i)
+    #     train_model(model_name, 800_000)
 
-    # run(episodes=2,
-    #     render_mode="on",
-    #     show_episode_history=True,
-    #     agent_name="model",
-    #     model_name="PPO/1env/3x3_10x/PPO_3x3_10x_200k_20")
+    run(episodes=50,
+        render_mode="off",
+        show_episode_history=False,
+        agent_name="model",
+        model_name="DQN/2x2_10x/DQN_2x2_10x_200k_8")
